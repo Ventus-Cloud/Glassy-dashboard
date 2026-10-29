@@ -1,0 +1,29 @@
+{
+  "name": "glassy-pterodactyl-theme",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vista de servidor glassmorphism para un tema de Pterodactyl Panel (React + TypeScript + Tailwind CSS v4).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "build:panel-css": "tailwindcss -i src/styles/glassy.panel.css -o dist/glassy.panel.css --minify"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "@tailwindcss/vite": "4.1.18",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "4.4.1",
+    "tailwindcss": "4.1.18",
+    "typescript": "5.7.3",
+    "vite": "6.3.5",
+    "vite-plugin-singlefile": "2.2.0"
+  }
+}

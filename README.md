@@ -1,8 +1,15 @@
 # Glassy Panel
 
-Wireframe de alta fidelidad de un panel para gestionar servidores de videojuegos, inspirado en [Pterodactyl](https://pterodactyl.io) y con estética **glassmorphism**.
+Interfaces para gestionar servidores de videojuegos, inspiradas en [Pterodactyl](https://pterodactyl.io) y con estética **glassmorphism**.
 
-Todo está en un único archivo, `index.html` (HTML + Tailwind CSS v4 + JavaScript sin dependencias). Los datos son simulados en el navegador.
+El repositorio tiene dos versiones:
+
+| Carpeta | Qué es |
+|---|---|
+| `index.html` | **Dashboard del nodo**: wireframe en un único archivo (HTML + Tailwind CSS v4 por CDN + JavaScript sin dependencias). Se describe en este README. |
+| [`pterodactyl-theme/`](pterodactyl-theme/) | **Tema para Pterodactyl**: vista de un servidor con pestañas (Consola, Archivos, Inicio, Ajustes y red), escrita en React + TypeScript + Tailwind CSS v4 con la estructura de `resources/scripts` del panel. Tiene su propio README con la guía de integración. |
+
+En las dos versiones los datos son simulados en el navegador.
 
 ## Cómo verlo
 

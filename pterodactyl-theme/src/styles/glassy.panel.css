@@ -1,0 +1,14 @@
+/*
+ * Entrada para compilar el tema dentro de Pterodactyl (npm run build:panel-css).
+ *
+ * El panel ya trae su propio reset con Tailwind 3, así que aquí se omite el
+ * preflight de Tailwind v4 y solo se generan tokens, utilidades y el tema.
+ */
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./glassy.theme.css";
+
+/* Escanea los componentes del tema (ajusta la ruta si los mueves). */
+@source "../components";
