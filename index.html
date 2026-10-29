@@ -1,0 +1,2109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Glassy Panel · Nodo FRA-01</title>
+  <meta name="description" content="Wireframe de alta fidelidad de un panel de gestión de servidores de videojuegos con estética glassmorphism, inspirado en Pterodactyl." />
+  <meta name="theme-color" content="#0a0620" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23a78bfa'/%3E%3Cstop offset='1' stop-color='%23e879f9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z'/%3E%3Cpath fill='%23fff' d='M21.5 11 14 22h5l-1.5 7L25 18h-5z'/%3E%3C/svg%3E" />
+
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" />
+
+  <!-- Evita el destello blanco mientras Tailwind compila -->
+  <style>html, body { background: #07041a; color: #cbd5e1; }</style>
+
+  <!-- Tailwind CSS v4 (Play CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18/dist/index.global.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    @layer base {
+      :root { --ease-glass: cubic-bezier(.2, .8, .2, 1); color-scheme: dark; }
+      html { -webkit-tap-highlight-color: transparent; }
+      ::selection { background: rgba(167, 139, 250, .35); color: #fff; }
+      button:not(:disabled), [role="button"] { cursor: pointer; }
+    }
+
+    @layer components {
+      /* ---------- Fondo animado ---------- */
+      .app-bg {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+        background:
+          radial-gradient(1200px 800px at 0% 0%, rgba(91, 33, 182, .55), transparent 60%),
+          radial-gradient(1000px 700px at 100% 10%, rgba(190, 24, 93, .26), transparent 60%),
+          radial-gradient(1100px 900px at 60% 115%, rgba(30, 64, 175, .45), transparent 60%),
+          linear-gradient(135deg, #0a0620 0%, #120a33 45%, #1a0b3d 100%);
+      }
+      .orb { position: absolute; border-radius: 9999px; will-change: transform; animation: orb-float 26s ease-in-out infinite; }
+      .orb-a { width: 46rem; height: 46rem; left: -14rem; top: -16rem; background: radial-gradient(closest-side, rgba(139, 92, 246, .50), transparent); }
+      .orb-b { width: 38rem; height: 38rem; right: -12rem; top: 18%; background: radial-gradient(closest-side, rgba(217, 70, 239, .32), transparent); animation-duration: 30s; animation-delay: -8s; }
+      .orb-c { width: 44rem; height: 44rem; left: 28%; bottom: -22rem; background: radial-gradient(closest-side, rgba(59, 130, 246, .36), transparent); animation-duration: 34s; animation-delay: -14s; }
+      .orb-d { width: 22rem; height: 22rem; left: 55%; top: 6%; background: radial-gradient(closest-side, rgba(34, 211, 238, .16), transparent); animation-delay: -4s; }
+      .grid-overlay {
+        position: absolute; inset: 0;
+        background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 25%, #000 20%, transparent 75%);
+      }
+      .noise {
+        position: absolute; inset: 0; opacity: .06; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      }
+
+      /* ---------- Cristal ---------- */
+      .glass {
+        @apply relative border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl backdrop-saturate-150;
+        box-shadow: 0 12px 40px -16px rgba(3, 0, 20, .75), inset 0 1px 0 0 rgba(255, 255, 255, .10);
+      }
+      /* destello en el borde superior */
+      .glass::after {
+        content: ""; position: absolute; inset-inline: 12%; top: -1px; height: 1px; pointer-events: none;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent); opacity: .55;
+      }
+      .glass-pop {
+        @apply rounded-2xl border border-white/15 bg-[#140d33]/95 backdrop-blur-2xl;
+        box-shadow: 0 24px 60px -12px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .08);
+      }
+      .glass-hover {
+        transition: transform .45s var(--ease-glass), box-shadow .45s var(--ease-glass), border-color .45s, background-color .45s;
+      }
+      .glass-hover:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, .24);
+        background-color: rgba(255, 255, 255, .085);
+        box-shadow: 0 24px 60px -20px rgba(124, 58, 237, .55), 0 0 0 1px rgba(196, 181, 253, .10), inset 0 1px 0 0 rgba(255, 255, 255, .18);
+      }
+      /* foco de luz que sigue al cursor */
+      .spotlight::before {
+        content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .5s;
+        background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--spot, rgba(167, 139, 250, .14)), transparent 55%);
+      }
+      .spotlight:hover::before { opacity: 1; }
+
+      /* ---------- Botones ---------- */
+      .icon-btn {
+        @apply relative grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.06] text-slate-300 transition duration-300
+               hover:border-white/25 hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60;
+      }
+      .icon-btn-sm {
+        @apply grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60;
+      }
+      .icon-btn-sm[aria-pressed="true"] { @apply bg-violet-500/20 text-violet-200; }
+      .btn-primary {
+        @apply relative inline-flex items-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition duration-300
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/70;
+        background: linear-gradient(135deg, #8b5cf6, #d946ef);
+        box-shadow: 0 8px 24px -8px rgba(217, 70, 239, .6), inset 0 1px 0 rgba(255, 255, 255, .25);
+      }
+      .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 14px 34px -8px rgba(217, 70, 239, .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+
+      .btn-power {
+        @apply relative isolate inline-flex flex-col items-center justify-center gap-1 overflow-hidden rounded-xl border px-3 py-3 text-xs font-semibold
+               backdrop-blur-md transition-all duration-300 focus-visible:outline-none focus-visible:ring-2
+               disabled:cursor-not-allowed disabled:opacity-35 disabled:saturate-50
+               sm:flex-row sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm;
+      }
+      /* barrido de brillo */
+      .btn-power::after {
+        content: ""; position: absolute; inset: 0; z-index: -1; transform: translateX(-120%); transition: transform .8s var(--ease-glass);
+        background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .28) 50%, transparent 70%);
+      }
+      .btn-power:not(:disabled):hover { transform: translateY(-2px); }
+      .btn-power:not(:disabled):hover::after { transform: translateX(120%); }
+      .btn-power:not(:disabled):active { transform: translateY(0) scale(.98); }
+      .btn-start   { @apply border-emerald-400/30 bg-emerald-500/15 text-emerald-100 focus-visible:ring-emerald-400/60; }
+      .btn-restart { @apply border-amber-400/30 bg-amber-500/15 text-amber-100 focus-visible:ring-amber-400/60; }
+      .btn-stop    { @apply border-rose-400/30 bg-rose-500/15 text-rose-100 focus-visible:ring-rose-400/60; }
+      .btn-start:not(:disabled):hover   { border-color: rgba(110, 231, 183, .65); background-color: rgba(16, 185, 129, .26); box-shadow: 0 0 0 1px rgba(52, 211, 153, .25), 0 10px 34px -6px rgba(16, 185, 129, .65), inset 0 0 22px rgba(16, 185, 129, .22); }
+      .btn-restart:not(:disabled):hover { border-color: rgba(252, 211, 77, .65); background-color: rgba(245, 158, 11, .26); box-shadow: 0 0 0 1px rgba(251, 191, 36, .25), 0 10px 34px -6px rgba(245, 158, 11, .65), inset 0 0 22px rgba(245, 158, 11, .22); }
+      .btn-stop:not(:disabled):hover    { border-color: rgba(253, 164, 175, .65); background-color: rgba(244, 63, 94, .26);  box-shadow: 0 0 0 1px rgba(251, 113, 133, .25), 0 10px 34px -6px rgba(244, 63, 94, .65), inset 0 0 22px rgba(244, 63, 94, .22); }
+      .btn-power .btn-ico { transition: transform .5s var(--ease-glass); }
+      .btn-start:not(:disabled):hover .btn-ico   { transform: scale(1.18); }
+      .btn-restart:not(:disabled):hover .btn-ico { transform: rotate(180deg); }
+      .btn-stop:not(:disabled):hover .btn-ico    { transform: scale(1.12); }
+
+      .qcmd { @apply rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[11px] text-slate-400 transition hover:border-fuchsia-300/40 hover:bg-fuchsia-400/10 hover:text-fuchsia-100; }
+      .filter-btn { @apply rounded-lg px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:text-white; }
+      .filter-btn[aria-pressed="true"] { @apply bg-white/[0.12] text-white; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
+
+      /* ---------- Elementos ---------- */
+      .meta-chip { @apply inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-slate-300; }
+      .kbd { @apply rounded-md border border-white/15 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-slate-400; }
+      .stat-ico {
+        @apply grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-linear-to-br ring-1;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15);
+      }
+      .game-tile {
+        @apply grid shrink-0 place-items-center rounded-2xl bg-linear-to-br text-white ring-1 ring-white/25;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 12px 32px -10px var(--glow, rgba(139, 92, 246, .6));
+      }
+
+      .meter { @apply relative h-2.5 w-full overflow-hidden rounded-full bg-white/[0.08] ring-1 ring-white/5; }
+      .meter-fill {
+        position: relative; height: 100%; border-radius: inherit;
+        background: linear-gradient(90deg, #22d3ee, #8b5cf6 60%, #d946ef);
+        box-shadow: 0 0 16px rgba(139, 92, 246, .65);
+        transition: width .9s var(--ease-glass);
+      }
+      .meter-fill::after {
+        content: ""; position: absolute; inset: 0; border-radius: inherit;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .45), transparent);
+        background-size: 50% 100%; background-repeat: no-repeat;
+        animation: shimmer 2.6s linear infinite;
+      }
+      .meter[data-level="warn"] .meter-fill { background: linear-gradient(90deg, #fbbf24, #f97316); box-shadow: 0 0 16px rgba(251, 146, 60, .6); }
+      .meter[data-level="crit"] .meter-fill { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 16px rgba(244, 63, 94, .65); }
+      .core-fill { transition: height .9s var(--ease-glass); }
+      .mini-meter { @apply h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]; }
+      .mini-meter > div { height: 100%; border-radius: inherit; transition: width .9s var(--ease-glass); }
+
+      /* ---------- Sidebar ---------- */
+      .sidebar {
+        position: fixed; inset-block: 0; left: 0; z-index: 50; width: 19.5rem; padding: .75rem;
+        translate: -105% 0; transition: translate .5s var(--ease-glass), width .45s var(--ease-glass);
+      }
+      .sidebar[data-open="true"] { translate: 0 0; }
+      .sidebar-backdrop { opacity: 0; pointer-events: none; transition: opacity .4s; }
+      .sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+      @media (min-width: 64rem) {
+        .sidebar { position: sticky; top: 0; height: 100dvh; translate: none; flex-shrink: 0; width: 19rem; padding: 1rem 0 1rem 1rem; }
+        .sidebar.is-collapsed { width: 6rem; }
+        .sidebar.is-collapsed .hide-collapsed { display: none !important; }
+        .sidebar.is-collapsed .nav-item { justify-content: center; padding-inline: 0; }
+        .sidebar.is-collapsed .submenu { display: none; }
+        .sidebar.is-collapsed .brand-row { flex-direction: column; gap: .75rem; }
+        .sidebar.is-collapsed .collapse-ico { rotate: 180deg; }
+        .sidebar.is-collapsed .user-card { justify-content: center; }
+        .sidebar.is-collapsed .section-label { height: 1px; margin: .75rem .75rem; padding: 0; overflow: hidden; color: transparent; background: rgba(255, 255, 255, .1); }
+        .sidebar.is-collapsed .user-menu { left: calc(100% + .75rem); right: auto; bottom: .25rem; width: 15rem; margin: 0; transform-origin: bottom left; }
+      }
+      .section-label { @apply px-3 pb-2 pt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500; }
+      .nav-item {
+        @apply flex w-full items-center gap-3 rounded-2xl px-2.5 py-2 text-sm font-medium text-slate-300 transition-all duration-300
+               hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60;
+      }
+      .nav-ico { @apply grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/[0.06] text-slate-300 ring-1 ring-white/10 transition duration-300; }
+      .nav-item:hover .nav-ico { @apply bg-white/[0.12] text-white; }
+      .nav-item.is-active {
+        color: #fff;
+        background: linear-gradient(90deg, rgba(139, 92, 246, .28), rgba(217, 70, 239, .07));
+        box-shadow: inset 0 0 0 1px rgba(196, 181, 253, .18), 0 8px 24px -12px rgba(139, 92, 246, .6);
+      }
+      .nav-item.is-active .nav-ico { color: #fff; background: linear-gradient(135deg, #8b5cf6, #d946ef); box-shadow: 0 6px 18px -6px rgba(217, 70, 239, .75); }
+      .nav-chevron { transition: rotate .35s var(--ease-glass); }
+      .nav-group[data-open="true"] .nav-chevron { rotate: 180deg; }
+      .submenu { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .45s var(--ease-glass), opacity .3s; }
+      .submenu > div { overflow: hidden; }
+      .nav-group[data-open="true"] .submenu { grid-template-rows: 1fr; opacity: 1; }
+      .sub-item {
+        @apply flex items-center gap-2.5 rounded-xl py-2 pl-3 pr-2 text-left text-[13px] text-slate-400 transition
+               hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60;
+      }
+      .sub-item.is-active { @apply bg-white/[0.09] text-white; }
+
+      /* ---------- Dropdowns y toasts ---------- */
+      .pop {
+        visibility: hidden; opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right;
+        transition: opacity .2s, transform .25s var(--ease-glass), visibility 0s linear .25s;
+      }
+      .pop.pop-up { transform: translateY(6px) scale(.98); transform-origin: bottom center; }
+      .pop.is-open { visibility: visible; opacity: 1; transform: none; transition: opacity .2s, transform .25s var(--ease-glass), visibility 0s; }
+      .toast { opacity: 0; transform: translateY(12px) scale(.98); transition: opacity .3s, transform .45s var(--ease-glass); }
+      .toast.is-shown { opacity: 1; transform: none; }
+
+      /* ---------- Consola ---------- */
+      .console-out { scrollbar-gutter: stable; }
+      .console-out > div { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .cl-new { animation: line-in .35s ease-out backwards; }
+      .scanlines::after {
+        content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+        background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, .022) 0 1px, transparent 1px 3px);
+      }
+      .console-card.is-expanded { position: fixed; inset: .75rem; z-index: 70; background-color: rgba(12, 8, 32, .92); }
+      @media (min-width: 40rem) { .console-card.is-expanded { inset: 1.5rem; } }
+      .console-backdrop { opacity: 0; pointer-events: none; transition: opacity .3s; }
+      .console-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+      /* ---------- Tarjetas de servidor ---------- */
+      .server-card.is-selected {
+        border-color: rgba(196, 181, 253, .45);
+        background-color: rgba(139, 92, 246, .14);
+        box-shadow: 0 0 0 1px rgba(167, 139, 250, .35), 0 18px 50px -18px rgba(139, 92, 246, .75), inset 0 1px 0 rgba(255, 255, 255, .15);
+      }
+
+      .scroll-thin { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .16) transparent; }
+      .scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+      .scroll-thin::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .14); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+
+      .rise-in { animation: rise-in .7s var(--ease-glass) backwards; animation-delay: var(--d, 0ms); }
+      .swap-in { animation: swap-in .5s var(--ease-glass) backwards; }
+      .wiggle { animation: wiggle .7s ease-in-out; }
+      .text-gradient { @apply bg-linear-to-r from-violet-300 via-fuchsia-300 to-cyan-300 bg-clip-text text-transparent; }
+    }
+
+    @keyframes orb-float {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      33% { transform: translate3d(5rem, -3rem, 0) scale(1.08); }
+      66% { transform: translate3d(-4rem, 3rem, 0) scale(.94); }
+    }
+    @keyframes shimmer { from { background-position: -100% 0; } to { background-position: 250% 0; } }
+    @keyframes line-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes swap-in { from { opacity: .3; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes wiggle { 0%, 100% { rotate: 0deg; } 20% { rotate: -14deg; } 40% { rotate: 12deg; } 60% { rotate: -8deg; } 80% { rotate: 4deg; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body class="min-h-dvh font-sans antialiased">
+  <!-- ======================= FONDO ======================= -->
+  <div class="app-bg" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="orb orb-d"></div>
+    <div class="grid-overlay"></div>
+    <div class="noise"></div>
+  </div>
+
+  <div class="relative z-10 flex min-h-dvh">
+    <!-- ======================= SIDEBAR ======================= -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden" aria-hidden="true"></div>
+
+    <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+      <div class="glass flex h-full flex-col rounded-3xl">
+        <!-- Marca -->
+        <div class="brand-row flex items-center gap-3 px-4 pb-2 pt-5">
+          <a href="#" class="flex min-w-0 items-center gap-3" aria-label="Glassy Panel, inicio">
+            <svg viewBox="0 0 40 40" class="h-10 w-10 shrink-0 drop-shadow-[0_6px_18px_rgba(217,70,239,.55)]" aria-hidden="true">
+              <defs>
+                <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#a78bfa" /><stop offset=".55" stop-color="#8b5cf6" /><stop offset="1" stop-color="#e879f9" />
+                </linearGradient>
+              </defs>
+              <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z" fill="url(#logoGrad)" />
+              <path d="M20 2.5 35.2 11.25v17.5L20 37.5 4.8 28.75v-17.5Z" fill="none" stroke="rgba(255,255,255,.45)" />
+              <path d="M21.5 11 14 22h5l-1.5 7L25 18h-5z" fill="#fff" />
+            </svg>
+            <span class="hide-collapsed min-w-0">
+              <span class="block font-display text-lg font-semibold leading-tight text-white">Glassy<span class="text-gradient">Panel</span></span>
+              <span class="block truncate text-[11px] text-slate-400">Game Server Manager</span>
+            </span>
+          </a>
+          <button id="collapseBtn" class="icon-btn-sm ml-auto hidden lg:grid" aria-label="Contraer barra lateral" aria-expanded="true" title="Contraer / expandir">
+            <i data-icon="chevrons-left" class="collapse-ico h-4 w-4 transition-[rotate] duration-500"></i>
+          </button>
+          <button id="closeSidebar" class="icon-btn-sm ml-auto lg:hidden" aria-label="Cerrar menú">
+            <i data-icon="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+
+        <!-- Navegación -->
+        <nav class="scroll-thin flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3" aria-label="Secciones">
+          <p class="section-label">Gestión</p>
+
+          <div class="nav-group" data-open="true">
+            <button class="nav-item is-active" data-group-toggle aria-expanded="true" aria-controls="sub-servers" title="Servidores">
+              <span class="nav-ico"><i data-icon="server" class="h-[18px] w-[18px]"></i></span>
+              <span class="hide-collapsed flex-1 text-left">Servidores</span>
+              <span id="navServerCount" class="hide-collapsed rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-slate-200">4</span>
+              <i data-icon="chevron-down" class="nav-chevron hide-collapsed h-4 w-4 text-slate-400"></i>
+            </button>
+            <div id="sub-servers" class="submenu">
+              <div>
+                <ul id="navServers" class="ml-[1.6rem] mt-1 space-y-0.5 border-l border-white/10 pl-2.5"></ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="nav-group mt-1" data-open="false">
+            <button class="nav-item" data-group-toggle aria-expanded="false" aria-controls="sub-db" title="Base de datos">
+              <span class="nav-ico"><i data-icon="database" class="h-[18px] w-[18px]"></i></span>
+              <span class="hide-collapsed flex-1 text-left">Base de datos</span>
+              <i data-icon="chevron-down" class="nav-chevron hide-collapsed h-4 w-4 text-slate-400"></i>
+            </button>
+            <div id="sub-db" class="submenu">
+              <div>
+                <ul class="ml-[1.6rem] mt-1 space-y-0.5 border-l border-white/10 pl-2.5">
+                  <li><button type="button" class="sub-item w-full" data-soon="Bases de datos MySQL"><i data-icon="database" class="h-3.5 w-3.5"></i>MySQL<span class="ml-auto font-mono text-[10px] text-slate-500">3</span></button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Copias de seguridad"><i data-icon="archive" class="h-3.5 w-3.5"></i>Copias de seguridad</button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Usuarios de BD"><i data-icon="users" class="h-3.5 w-3.5"></i>Usuarios de BD</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="nav-group mt-1" data-open="false">
+            <button class="nav-item" data-group-toggle aria-expanded="false" aria-controls="sub-net" title="Red">
+              <span class="nav-ico"><i data-icon="network" class="h-[18px] w-[18px]"></i></span>
+              <span class="hide-collapsed flex-1 text-left">Red</span>
+              <i data-icon="chevron-down" class="nav-chevron hide-collapsed h-4 w-4 text-slate-400"></i>
+            </button>
+            <div id="sub-net" class="submenu">
+              <div>
+                <ul class="ml-[1.6rem] mt-1 space-y-0.5 border-l border-white/10 pl-2.5">
+                  <li><button type="button" class="sub-item w-full" data-soon="Asignaciones"><i data-icon="globe" class="h-3.5 w-3.5"></i>Asignaciones</button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Puertos y firewall"><i data-icon="shield" class="h-3.5 w-3.5"></i>Puertos y firewall</button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Subdominios"><i data-icon="link" class="h-3.5 w-3.5"></i>Subdominios</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <p class="section-label">Sistema</p>
+
+          <div class="nav-group" data-open="false">
+            <button class="nav-item" data-group-toggle aria-expanded="false" aria-controls="sub-settings" title="Configuración">
+              <span class="nav-ico"><i data-icon="settings" class="h-[18px] w-[18px]"></i></span>
+              <span class="hide-collapsed flex-1 text-left">Configuración</span>
+              <i data-icon="chevron-down" class="nav-chevron hide-collapsed h-4 w-4 text-slate-400"></i>
+            </button>
+            <div id="sub-settings" class="submenu">
+              <div>
+                <ul class="ml-[1.6rem] mt-1 space-y-0.5 border-l border-white/10 pl-2.5">
+                  <li><button type="button" class="sub-item w-full" data-soon="Ajustes generales"><i data-icon="sliders" class="h-3.5 w-3.5"></i>General</button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Claves API"><i data-icon="key" class="h-3.5 w-3.5"></i>Claves API</button></li>
+                  <li><button type="button" class="sub-item w-full" data-soon="Seguridad y 2FA"><i data-icon="shield" class="h-3.5 w-3.5"></i>Seguridad y 2FA</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recursos del nodo -->
+          <div class="hide-collapsed mt-6 rounded-2xl border border-white/10 bg-linear-to-br from-violet-500/15 via-white/[0.03] to-cyan-400/10 p-4">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold text-white">Recursos del nodo</p>
+              <span class="font-mono text-[10px] text-slate-400">fra-01</span>
+            </div>
+            <div class="mt-3 space-y-3 text-[11px]">
+              <div>
+                <div class="mb-1 flex justify-between text-slate-400"><span>CPU</span><span id="nodeCpuVal" class="font-mono text-slate-200">0%</span></div>
+                <div class="mini-meter"><div id="nodeCpuBar" class="bg-linear-to-r from-cyan-400 to-violet-500" style="width:0%"></div></div>
+              </div>
+              <div>
+                <div class="mb-1 flex justify-between text-slate-400"><span>RAM</span><span id="nodeRamVal" class="font-mono text-slate-200">0 / 64 GB</span></div>
+                <div class="mini-meter"><div id="nodeRamBar" class="bg-linear-to-r from-violet-400 to-fuchsia-500" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Usuario -->
+        <div class="relative border-t border-white/10 p-3">
+          <button id="userBtn" class="user-card flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-2.5 text-left transition hover:border-white/20 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60" aria-haspopup="menu" aria-expanded="false" aria-controls="userMenu">
+            <span class="relative shrink-0">
+              <span class="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-violet-500 to-fuchsia-500 font-display text-sm font-bold text-white shadow-[0_6px_18px_-6px_rgba(217,70,239,.7)]">AM</span>
+              <span id="userDot" class="absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border-2 border-[#1b1342] bg-emerald-400"></span>
+            </span>
+            <span class="hide-collapsed min-w-0 flex-1">
+              <span class="block truncate text-sm font-semibold text-white">Alex Moreno</span>
+              <span id="userStatusLabel" class="block truncate text-xs text-emerald-300">En línea · Administrador</span>
+            </span>
+            <i data-icon="chevrons-up-down" class="hide-collapsed h-4 w-4 text-slate-400"></i>
+          </button>
+
+          <div id="userMenu" role="menu" class="user-menu pop pop-up glass-pop absolute bottom-full left-3 right-3 mb-2 p-1.5" aria-label="Estado del usuario">
+            <p class="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Estado</p>
+            <div id="userStatusList"></div>
+            <div class="my-1.5 h-px bg-white/10"></div>
+            <button type="button" role="menuitem" class="sub-item w-full" data-soon="Mi cuenta"><i data-icon="users" class="h-4 w-4"></i>Mi cuenta</button>
+            <button type="button" role="menuitem" class="sub-item w-full text-rose-300 hover:text-rose-200" data-soon="Cerrar sesión"><i data-icon="logout" class="h-4 w-4"></i>Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================= CONTENIDO ======================= -->
+    <div class="flex min-w-0 flex-1 flex-col">
+      <!-- Header -->
+      <header class="sticky top-0 z-30 px-3 pt-3 sm:px-6 lg:px-8 lg:pt-4">
+        <div class="glass flex flex-wrap items-center gap-3 rounded-2xl px-3 py-3 sm:px-5">
+          <button id="openSidebar" class="icon-btn lg:hidden" aria-label="Abrir menú" aria-controls="sidebar">
+            <i data-icon="menu" class="h-5 w-5"></i>
+          </button>
+
+          <div class="min-w-0 flex-1">
+            <nav class="flex items-center gap-1.5 text-[11px] text-slate-400" aria-label="Ruta de navegación">
+              <span>Nodos</span><i data-icon="chevron-right" class="h-3 w-3"></i>
+              <span>Europa</span><i data-icon="chevron-right" class="h-3 w-3"></i>
+              <span class="text-slate-300">fra-01</span>
+            </nav>
+            <div class="flex items-center gap-2.5">
+              <h1 class="truncate font-display text-lg font-semibold text-white sm:text-xl">Nodo <span class="text-gradient">FRA-01</span></h1>
+              <span class="hidden items-center gap-1.5 rounded-full bg-emerald-400/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300 ring-1 ring-emerald-400/25 sm:inline-flex">
+                <span class="relative flex h-1.5 w-1.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70"></span><span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span></span>
+                Online · <span id="nodeLatency" class="font-mono">12 ms</span>
+              </span>
+              <span class="hidden items-center gap-1 text-[11px] text-slate-400 xl:inline-flex"><i data-icon="map-pin" class="h-3.5 w-3.5"></i>Frankfurt, DE · Wings v1.11.13</span>
+            </div>
+          </div>
+
+          <!-- Buscador rápido -->
+          <div id="searchWrap" class="relative order-last w-full md:order-none md:w-72 lg:w-80">
+            <label for="search" class="sr-only">Buscar</label>
+            <i data-icon="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+            <input id="search" type="text" autocomplete="off" spellcheck="false" placeholder="Buscar servidores, secciones…"
+              class="w-full rounded-xl border border-white/10 bg-white/[0.06] py-2.5 pl-10 pr-16 text-sm text-white placeholder:text-slate-500 transition focus:border-violet-300/50 focus:bg-white/10 focus:outline-none focus:ring-4 focus:ring-violet-500/15"
+              role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list" />
+            <kbd id="searchKbd" class="kbd pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">Ctrl K</kbd>
+            <div id="searchResults" role="listbox" class="pop glass-pop absolute left-0 right-0 top-full z-50 mt-2 max-h-80 overflow-y-auto p-1.5 scroll-thin" aria-label="Resultados de búsqueda"></div>
+          </div>
+
+          <!-- Notificaciones -->
+          <div class="relative">
+            <button id="notifBtn" class="icon-btn" aria-label="Notificaciones" aria-haspopup="true" aria-expanded="false" aria-controls="notifPanel">
+              <i data-icon="bell" class="h-5 w-5"></i>
+              <span id="notifBadge" class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-linear-to-br from-fuchsia-500 to-rose-500 px-1 text-[10px] font-bold text-white shadow-[0_0_12px_rgba(236,72,153,.8)] ring-2 ring-[#160e38]">3</span>
+            </button>
+            <div id="notifPanel" class="pop glass-pop absolute right-0 top-full z-50 mt-3 w-[min(23rem,calc(100vw-1.5rem))] p-2">
+              <div class="flex items-center justify-between px-2 pb-2 pt-1">
+                <div>
+                  <p class="text-sm font-semibold text-white">Notificaciones</p>
+                  <p id="notifSummary" class="text-[11px] text-slate-400">3 sin leer</p>
+                </div>
+                <button id="markAllRead" class="rounded-lg px-2 py-1 text-xs font-medium text-violet-300 transition hover:bg-white/10 hover:text-violet-200">Marcar todo como leído</button>
+              </div>
+              <ul id="notifList" class="scroll-thin max-h-96 space-y-0.5 overflow-y-auto"></ul>
+            </div>
+          </div>
+
+          <button class="btn-primary hidden sm:inline-flex" data-soon="Crear servidor">
+            <i data-icon="plus" class="h-4 w-4"></i><span class="hidden lg:inline">Nuevo servidor</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Vista principal -->
+      <main id="main" class="flex-1 space-y-5 px-3 pb-8 pt-5 sm:px-6 lg:space-y-6 lg:px-8 lg:pt-6">
+
+        <!-- Hero del servidor -->
+        <section id="hero" class="glass spotlight rise-in rounded-3xl p-5 sm:p-6" aria-labelledby="heroName">
+          <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]" aria-hidden="true">
+            <div id="heroGlow" class="absolute -right-24 -top-28 h-80 w-80 rounded-full opacity-70 transition-[background] duration-700"></div>
+            <div class="absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,.25),transparent)]"></div>
+          </div>
+          <div class="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div class="flex min-w-0 items-start gap-4">
+              <div id="heroTile" class="game-tile h-14 w-14 sm:h-16 sm:w-16"></div>
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h2 id="heroName" class="truncate font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">Survival SMP</h2>
+                  <span id="heroStatus"></span>
+                </div>
+                <p id="heroMeta" class="mt-1 text-sm text-slate-400"></p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button id="copyIp" class="meta-chip group transition hover:border-violet-300/40 hover:bg-violet-400/10 hover:text-white" title="Copiar dirección">
+                    <i data-icon="globe" class="h-3.5 w-3.5 text-violet-300"></i>
+                    <span id="heroIp" class="font-mono">203.0.113.42:25565</span>
+                    <i data-icon="copy" class="h-3.5 w-3.5 text-slate-500 transition group-hover:text-violet-200"></i>
+                  </button>
+                  <span class="meta-chip"><i data-icon="users" class="h-3.5 w-3.5 text-fuchsia-300"></i><span id="heroPlayers" class="font-mono">0 / 0</span> jugadores</span>
+                  <span class="meta-chip"><i data-icon="clock" class="h-3.5 w-3.5 text-cyan-300"></i>Uptime <span id="heroUptime" class="font-mono">—</span></span>
+                  <span class="meta-chip hidden sm:inline-flex xl:hidden 2xl:inline-flex"><i data-icon="map-pin" class="h-3.5 w-3.5 text-emerald-300"></i>Frankfurt, DE</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5 sm:flex sm:gap-3" role="group" aria-label="Control de energía">
+              <button id="btnStart" class="btn-power btn-start" data-power="start" title="Iniciar servidor">
+                <i data-icon="play" class="btn-ico h-4 w-4"></i><span>Iniciar</span>
+              </button>
+              <button id="btnRestart" class="btn-power btn-restart" data-power="restart" title="Reiniciar servidor">
+                <i data-icon="rotate" class="btn-ico h-4 w-4"></i><span>Reiniciar</span>
+              </button>
+              <button id="btnStop" class="btn-power btn-stop" data-power="stop" title="Apagar servidor">
+                <i data-icon="power" class="btn-ico h-4 w-4"></i><span id="btnStopLabel">Apagar</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Métricas -->
+        <section class="grid gap-4 sm:grid-cols-2 lg:gap-6 xl:grid-cols-4" aria-label="Métricas en tiempo real">
+          <!-- CPU -->
+          <article class="glass glass-hover spotlight rise-in rounded-3xl p-5" style="--spot: rgba(34,211,238,.13); --d: 60ms">
+            <header class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="stat-ico from-cyan-400/35 to-sky-500/10 text-cyan-200 ring-cyan-300/30"><i data-icon="cpu" class="h-5 w-5"></i></span>
+                <div class="min-w-0">
+                  <h3 class="truncate text-sm font-medium text-slate-200">Uso de CPU</h3>
+                  <p id="cpuSub" class="truncate text-[11px] text-slate-500">4 vCores</p>
+                </div>
+              </div>
+              <span data-live></span>
+            </header>
+            <div class="mt-5 flex items-end justify-between gap-2">
+              <p class="font-display text-4xl font-semibold tabular-nums text-white"><span id="cpuVal">0.0</span><span class="text-xl text-slate-400">%</span></p>
+              <p class="pb-1 text-right text-[11px] leading-tight text-slate-400">límite<br /><span id="cpuLimit" class="font-mono text-slate-200">400%</span></p>
+            </div>
+            <div id="cpuMeter" class="meter mt-4" data-level="ok" role="progressbar" aria-label="Uso de CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div id="cpuBar" class="meter-fill" style="width:0%"></div>
+            </div>
+            <div id="cpuCores" class="mt-5 flex h-12 items-end gap-1.5" aria-hidden="true"></div>
+            <div class="mt-2 flex justify-between text-[11px] text-slate-500"><span>Hilos</span><span>Load avg <span id="cpuLoad" class="font-mono text-slate-300">0.00</span></span></div>
+          </article>
+
+          <!-- RAM -->
+          <article class="glass glass-hover spotlight rise-in rounded-3xl p-5" style="--spot: rgba(217,70,239,.13); --d: 120ms">
+            <header class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="stat-ico from-fuchsia-400/35 to-violet-500/10 text-fuchsia-200 ring-fuchsia-300/30"><i data-icon="memory" class="h-5 w-5"></i></span>
+                <div class="min-w-0">
+                  <h3 class="truncate text-sm font-medium text-slate-200">Memoria</h3>
+                  <p class="truncate text-[11px] text-slate-500"><span id="ramPct" class="font-mono">0%</span> en uso</p>
+                </div>
+              </div>
+              <span data-live></span>
+            </header>
+            <p class="mt-5 font-display text-4xl font-semibold tabular-nums text-white"><span id="ramVal">0.00</span><span class="text-xl text-slate-400"> GB</span> <span class="text-base font-medium text-slate-500">/ <span id="ramMax">12</span> GB</span></p>
+            <div class="relative mt-3 h-20">
+              <svg viewBox="0 0 300 80" preserveAspectRatio="none" class="h-full w-full overflow-visible" aria-hidden="true">
+                <defs>
+                  <linearGradient id="ramFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#d946ef" stop-opacity=".45" />
+                    <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
+                  </linearGradient>
+                  <linearGradient id="ramStroke" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#8b5cf6" /><stop offset="1" stop-color="#f0abfc" />
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(255,255,255,.07)" stroke-dasharray="3 5" vector-effect="non-scaling-stroke">
+                  <line x1="0" x2="300" y1="20" y2="20" vector-effect="non-scaling-stroke" />
+                  <line x1="0" x2="300" y1="40" y2="40" vector-effect="non-scaling-stroke" />
+                  <line x1="0" x2="300" y1="60" y2="60" vector-effect="non-scaling-stroke" />
+                </g>
+                <path id="ramArea" fill="url(#ramFill)" />
+                <path id="ramLine" fill="none" stroke="url(#ramStroke)" stroke-width="2.25" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+              </svg>
+              <span id="ramDot" class="absolute right-0 h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-fuchsia-300 shadow-[0_0_0_4px_rgba(217,70,239,.25),0_0_14px_rgba(240,171,252,.9)] transition-[top] duration-700" style="top:50%"></span>
+            </div>
+            <div class="mt-3 flex justify-between text-[11px] text-slate-500">
+              <span>Pico <span id="ramPeak" class="font-mono text-slate-300">0.0 GB</span></span>
+              <span>Media 60 s <span id="ramAvg" class="font-mono text-slate-300">0.0 GB</span></span>
+            </div>
+          </article>
+
+          <!-- Almacenamiento -->
+          <article class="glass glass-hover spotlight rise-in rounded-3xl p-5" style="--spot: rgba(52,211,153,.12); --d: 180ms">
+            <header class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="stat-ico from-emerald-400/35 to-teal-500/10 text-emerald-200 ring-emerald-300/30"><i data-icon="drive" class="h-5 w-5"></i></span>
+                <div class="min-w-0">
+                  <h3 class="truncate text-sm font-medium text-slate-200">Almacenamiento</h3>
+                  <p class="truncate text-[11px] text-slate-500">NVMe SSD · RAID 1</p>
+                </div>
+              </div>
+            </header>
+            <div class="mt-5 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-display text-4xl font-semibold tabular-nums text-white"><span id="diskVal">0.0</span><span class="text-xl text-slate-400"> GB</span></p>
+                <p class="mt-1 text-[11px] text-slate-400">de <span id="diskMax" class="font-mono text-slate-200">50</span> GB · <span id="diskFree" class="font-mono text-emerald-300">0 GB</span> libres</p>
+              </div>
+              <div class="relative h-[72px] w-[72px] shrink-0">
+                <svg viewBox="0 0 100 100" class="h-full w-full -rotate-90" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="diskGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#34d399" /><stop offset="1" stop-color="#22d3ee" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9" />
+                  <circle id="diskRing" cx="50" cy="50" r="42" fill="none" stroke="url(#diskGrad)" stroke-width="9" stroke-linecap="round"
+                    stroke-dasharray="263.9" stroke-dashoffset="263.9" class="drop-shadow-[0_0_6px_rgba(52,211,153,.7)] transition-[stroke-dashoffset] duration-1000" />
+                </svg>
+                <span id="diskPct" class="absolute inset-0 grid place-items-center font-display text-sm font-semibold text-white">0%</span>
+              </div>
+            </div>
+            <div id="diskSeg" class="mt-4 flex h-2 gap-0.5 overflow-hidden rounded-full bg-white/[0.08]" aria-hidden="true"></div>
+            <ul id="diskLegend" class="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-slate-400"></ul>
+          </article>
+
+          <!-- Red -->
+          <article class="glass glass-hover spotlight rise-in rounded-3xl p-5" style="--spot: rgba(56,189,248,.13); --d: 240ms">
+            <header class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="stat-ico from-sky-400/35 to-indigo-500/10 text-sky-200 ring-sky-300/30"><i data-icon="activity" class="h-5 w-5"></i></span>
+                <div class="min-w-0">
+                  <h3 class="truncate text-sm font-medium text-slate-200">Red</h3>
+                  <p class="truncate text-[11px] text-slate-500">Uplink 1 Gbps</p>
+                </div>
+              </div>
+              <span data-live></span>
+            </header>
+            <div class="mt-5 grid grid-cols-2 gap-2.5">
+              <div class="rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                <p class="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-400"><i data-icon="arrow-down" class="h-3.5 w-3.5 text-sky-300"></i>Entrada</p>
+                <p class="mt-0.5 whitespace-nowrap font-display text-lg font-semibold tabular-nums text-white sm:text-xl xl:text-lg"><span id="netIn">0.0</span> <span class="text-[10px] font-medium text-slate-400">Mb/s</span></p>
+              </div>
+              <div class="rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/10">
+                <p class="flex items-center gap-1 whitespace-nowrap text-[11px] text-slate-400"><i data-icon="arrow-up" class="h-3.5 w-3.5 text-violet-300"></i>Salida</p>
+                <p class="mt-0.5 whitespace-nowrap font-display text-lg font-semibold tabular-nums text-white sm:text-xl xl:text-lg"><span id="netOut">0.0</span> <span class="text-[10px] font-medium text-slate-400">Mb/s</span></p>
+              </div>
+            </div>
+            <div id="netBars" class="mt-4 flex h-14 items-end gap-[3px]" aria-hidden="true"></div>
+            <div class="mt-2 flex justify-between text-[11px] text-slate-500">
+              <span>Hoy <span id="netTotal" class="font-mono text-slate-300">0 GB</span></span>
+              <span>Pérdida <span class="font-mono text-emerald-300">0.01%</span></span>
+            </div>
+          </article>
+        </section>
+
+        <!-- Consola + panel lateral -->
+        <section class="grid gap-4 lg:gap-6 xl:grid-cols-3">
+          <div id="consoleBackdrop" class="console-backdrop fixed inset-0 z-[65] bg-black/60 backdrop-blur-sm" aria-hidden="true"></div>
+
+          <article id="consoleCard" class="console-card glass rise-in flex flex-col overflow-hidden rounded-3xl transition-[border-color,box-shadow] duration-500 hover:border-white/20 xl:col-span-2" style="--d: 300ms" aria-label="Consola del servidor">
+            <!-- Barra superior -->
+            <div class="flex items-center gap-3 border-b border-white/10 bg-white/[0.03] px-4 py-2.5">
+              <div class="hidden gap-1.5 sm:flex" aria-hidden="true">
+                <span class="h-3 w-3 rounded-full bg-rose-400/80 shadow-[0_0_8px_rgba(251,113,133,.6)]"></span>
+                <span class="h-3 w-3 rounded-full bg-amber-300/80 shadow-[0_0_8px_rgba(252,211,77,.6)]"></span>
+                <span class="h-3 w-3 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,.6)]"></span>
+              </div>
+              <div class="flex min-w-0 items-center gap-2 text-sm">
+                <i data-icon="terminal" class="h-4 w-4 shrink-0 text-violet-300"></i>
+                <span class="font-medium text-white">Consola</span>
+                <span id="consolePath" class="truncate font-mono text-xs text-slate-500">~/survival-smp</span>
+              </div>
+              <span data-live class="hidden sm:inline-flex"></span>
+              <div class="ml-auto flex items-center gap-0.5">
+                <button id="btnAutoscroll" class="icon-btn-sm" aria-pressed="true" aria-label="Desplazamiento automático" title="Desplazamiento automático"><i data-icon="scroll-down" class="h-4 w-4"></i></button>
+                <button id="btnClear" class="icon-btn-sm" aria-label="Limpiar consola" title="Limpiar consola"><i data-icon="trash" class="h-4 w-4"></i></button>
+                <button id="btnExpand" class="icon-btn-sm" aria-label="Ampliar consola" title="Ampliar consola (Esc para salir)"><i data-icon="maximize" class="h-4 w-4"></i></button>
+              </div>
+            </div>
+
+            <!-- Salida -->
+            <div class="scanlines relative flex min-h-0 flex-1 flex-col">
+              <div id="consoleOut" class="console-out scroll-thin min-h-[20rem] flex-1 basis-0 overflow-y-auto bg-[#05030f]/65 px-4 py-3 font-mono text-[11.5px] leading-[1.75] text-slate-300 sm:min-h-[24rem] sm:text-[12.5px]"
+                role="log" aria-label="Salida de la consola"></div>
+              <div class="pointer-events-none absolute inset-x-0 top-0 h-6 bg-linear-to-b from-black/40 to-transparent"></div>
+            </div>
+
+            <!-- Estadísticas de juego -->
+            <dl id="consoleStats" class="grid grid-cols-2 divide-white/10 border-t border-white/10 bg-black/25 text-[11px] sm:grid-cols-4 sm:divide-x"></dl>
+
+            <!-- Entrada de comandos -->
+            <form id="consoleForm" class="flex items-center gap-2 border-t border-white/10 bg-black/35 px-3 py-2.5" autocomplete="off">
+              <span class="font-mono text-sm font-semibold text-fuchsia-400 drop-shadow-[0_0_6px_rgba(232,121,249,.8)]" aria-hidden="true">❯</span>
+              <label for="consoleInput" class="sr-only">Comando</label>
+              <input id="consoleInput" spellcheck="false" class="min-w-0 flex-1 bg-transparent font-mono text-[13px] text-slate-100 caret-fuchsia-400 placeholder:text-slate-500 focus:outline-none disabled:cursor-not-allowed" placeholder="Escribe un comando…" />
+              <div class="hidden items-center gap-1.5 md:flex">
+                <button type="button" class="qcmd" data-cmd="help">help</button>
+                <button type="button" class="qcmd" data-cmd="list">list</button>
+                <button type="button" class="qcmd" data-cmd="tps">tps</button>
+              </div>
+              <button type="submit" class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-linear-to-br from-violet-500 to-fuchsia-500 text-white shadow-[0_6px_18px_-6px_rgba(217,70,239,.8)] transition hover:brightness-110" aria-label="Enviar comando">
+                <i data-icon="enter" class="h-4 w-4"></i>
+              </button>
+            </form>
+          </article>
+
+          <div class="grid gap-4 md:grid-cols-2 lg:gap-6 xl:grid-cols-1 xl:content-start">
+            <!-- Jugadores -->
+            <article class="glass glass-hover spotlight rise-in flex flex-col rounded-3xl p-5" style="--d: 360ms">
+              <header class="flex items-center justify-between gap-3">
+                <h3 class="flex items-center gap-2 text-sm font-semibold text-white"><i data-icon="users" class="h-4 w-4 text-fuchsia-300"></i>Jugadores en línea</h3>
+                <span id="playersBadge" class="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[11px] text-slate-200">0/0</span>
+              </header>
+              <div class="mini-meter mt-3"><div id="playersBar" class="bg-linear-to-r from-fuchsia-400 to-violet-500" style="width:0%"></div></div>
+              <ul id="playerList" class="scroll-thin -mx-2 mt-3 max-h-64 space-y-0.5 overflow-y-auto px-1 pb-3 [mask-image:linear-gradient(to_bottom,#000_82%,transparent)] xl:max-h-[13.25rem]"></ul>
+            </article>
+
+            <!-- Detalles -->
+            <article class="glass glass-hover spotlight rise-in rounded-3xl p-5" style="--d: 420ms">
+              <header class="flex items-center justify-between">
+                <h3 class="flex items-center gap-2 text-sm font-semibold text-white"><i data-icon="info" class="h-4 w-4 text-cyan-300"></i>Detalles del servidor</h3>
+                <button class="icon-btn-sm" data-soon="Ajustes del servidor" aria-label="Ajustes del servidor"><i data-icon="settings" class="h-4 w-4"></i></button>
+              </header>
+              <dl id="details" class="mt-3 text-[13px]"></dl>
+            </article>
+          </div>
+        </section>
+
+        <!-- Servidores del nodo -->
+        <section aria-labelledby="nodeServersTitle">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="nodeServersTitle" class="font-display text-xl font-semibold text-white">Servidores en el nodo</h2>
+              <p class="text-sm text-slate-400"><span id="activeCount">0 de 0</span> en ejecución · fra-01.panel.local</p>
+            </div>
+            <div class="glass flex gap-1 rounded-xl p-1" role="group" aria-label="Filtrar servidores">
+              <button class="filter-btn" data-filter="all" aria-pressed="true">Todos</button>
+              <button class="filter-btn" data-filter="on" aria-pressed="false">Activos</button>
+              <button class="filter-btn" data-filter="off" aria-pressed="false">Apagados</button>
+            </div>
+          </div>
+          <div id="serverGrid" class="grid gap-4 sm:grid-cols-2 lg:gap-6 xl:grid-cols-4"></div>
+        </section>
+      </main>
+
+      <footer class="flex flex-col items-center justify-between gap-2 px-4 pb-6 text-[11px] text-slate-500 sm:flex-row sm:px-6 lg:px-8">
+        <p>© 2026 Glassy Panel — wireframe de interfaz. Inspirado en el panel Pterodactyl.</p>
+        <p class="font-mono">Panel v1.0.0 · Wings v1.11.13 · datos simulados</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toasts" class="pointer-events-none fixed bottom-4 right-4 z-[80] flex w-[min(22rem,calc(100vw-2rem))] flex-col gap-2" aria-live="polite"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    /* =====================================================================
+       Utilidades
+       ===================================================================== */
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const randi = (a, b) => Math.floor(rand(a, b + 1));
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+    const pad = (n) => String(n).padStart(2, '0');
+    const hhmmss = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    const fmtDuration = (ms) => { const t = Math.floor(ms / 1000); return `${pad(Math.floor(t / 3600))}:${pad(Math.floor(t % 3600 / 60))}:${pad(t % 60)}`; };
+    const fmtInt = (n) => Math.round(n).toLocaleString('en-US');
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const uid = () => Math.random().toString(36).slice(2, 9);
+    const steamId = () => `7656119${randi(80000000, 99999999)}`;
+    const playerIp = () => `198.51.100.${randi(2, 254)}`;
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isDesktop = () => matchMedia('(min-width: 64rem)').matches;
+    const store = {
+      get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+      set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* almacenamiento no disponible */ } },
+    };
+    const ago = (t) => {
+      const m = Math.round((Date.now() - t) / 60000);
+      if (m < 1) return 'ahora mismo';
+      if (m < 60) return `hace ${m} min`;
+      if (m < 1440) return `hace ${Math.floor(m / 60)} h`;
+      return `hace ${Math.floor(m / 1440)} d`;
+    };
+    const playtime = (t) => {
+      const m = Math.max(1, Math.round((Date.now() - t) / 60000));
+      return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${pad(m % 60)} min`;
+    };
+
+    /* =====================================================================
+       Iconos (trazos estilo Lucide, 24×24)
+       ===================================================================== */
+    const ICONS = {
+      server: '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/>',
+      database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+      network: '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+      settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      cpu: '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/>',
+      memory: '<path d="M6 19v-3M10 19v-3M14 19v-3M18 19v-3M8 11V9M16 11V9M12 11V9M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.84V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.06a2 2 0 0 0 0-3.84Z"/>',
+      drive: '<path d="M22 12H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><path d="M6 16h.01M10 16h.01"/>',
+      activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+      search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+      bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+      play: '<path d="M6 3.8v16.4a1 1 0 0 0 1.5.86l13.2-8.2a1 1 0 0 0 0-1.72L7.5 2.94A1 1 0 0 0 6 3.8Z"/>',
+      rotate: '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>',
+      power: '<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>',
+      'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+      'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+      'chevrons-left': '<path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/>',
+      'chevrons-up-down': '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+      menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+      x: '<path d="M18 6 6 18M6 6l12 12"/>',
+      terminal: '<path d="m4 17 6-6-6-6"/><path d="M12 19h8"/>',
+      copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+      users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+      'user-x': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8 5 5M22 8l-5 5"/>',
+      clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+      'arrow-down': '<path d="M12 5v14M19 12l-7 7-7-7"/>',
+      'arrow-up': '<path d="m5 12 7-7 7 7M12 19V5"/>',
+      zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+      enter: '<path d="m9 10-5 5 5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>',
+      logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+      shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+      globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>',
+      link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+      archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4"/>',
+      check: '<path d="M20 6 9 17l-5-5"/>',
+      alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/>',
+      info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+      trash: '<path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+      maximize: '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+      minimize: '<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
+      'scroll-down': '<path d="M12 17V3M6 11l6 6 6-6M19 21H5"/>',
+      box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+      flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+      axe: '<path d="m14 12-8.5 8.5a2.12 2.12 0 1 1-3-3L11 9"/><path d="M15 13 9 7l4-4 6 6h3a8 8 0 0 1-7 7z"/>',
+      crosshair: '<circle cx="12" cy="12" r="10"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/>',
+      plus: '<path d="M5 12h14M12 5v14"/>',
+      'map-pin': '<path d="M20 10c0 5-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 15 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+      key: '<path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4M21 2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+      sliders: '<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>',
+    };
+    const svg = (name, cls = 'h-5 w-5') =>
+      `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+    const hydrateIcons = (root = document) =>
+      root.querySelectorAll('i[data-icon]').forEach((el) => { el.outerHTML = svg(el.dataset.icon, el.className || 'h-5 w-5'); });
+
+    /* =====================================================================
+       Estados de energía y tonos
+       ===================================================================== */
+    const STATES = {
+      running:  { label: 'En ejecución', dot: 'bg-emerald-400', text: 'text-emerald-200', pill: 'bg-emerald-400/10 ring-emerald-400/30', pulse: true,  glow: 'rgba(16,185,129,.38)' },
+      starting: { label: 'Iniciando…',   dot: 'bg-amber-400',   text: 'text-amber-200',   pill: 'bg-amber-400/10 ring-amber-400/30',     pulse: true,  glow: 'rgba(245,158,11,.36)' },
+      stopping: { label: 'Deteniendo…',  dot: 'bg-orange-400',  text: 'text-orange-200',  pill: 'bg-orange-400/10 ring-orange-400/30',   pulse: true,  glow: 'rgba(249,115,22,.34)' },
+      offline:  { label: 'Apagado',      dot: 'bg-rose-400',    text: 'text-rose-200',    pill: 'bg-rose-500/10 ring-rose-400/30',       pulse: false, glow: 'rgba(244,63,94,.30)' },
+    };
+    const TONES = {
+      emerald: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/25',
+      amber:   'bg-amber-400/15 text-amber-300 ring-amber-400/25',
+      rose:    'bg-rose-400/15 text-rose-300 ring-rose-400/25',
+      violet:  'bg-violet-400/15 text-violet-300 ring-violet-400/25',
+      sky:     'bg-sky-400/15 text-sky-300 ring-sky-400/25',
+    };
+    const statusDot = (state, size = 'h-2 w-2') => {
+      const st = STATES[state];
+      return `<span class="relative flex ${size} shrink-0">${st.pulse ? `<span class="absolute inline-flex h-full w-full animate-ping rounded-full ${st.dot} opacity-60"></span>` : ''}<span class="relative inline-flex h-full w-full rounded-full ${st.dot}"></span></span>`;
+    };
+    const statusPill = (state, small = false) => {
+      const st = STATES[state];
+      return `<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full ring-1 ${st.pill} ${st.text} ${small ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} font-medium">${statusDot(state, small ? 'h-1.5 w-1.5' : 'h-2 w-2')}${st.label}</span>`;
+    };
+    const liveChip = (state) => {
+      if (state === 'running') return '<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-emerald-300 ring-1 ring-emerald-400/25"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.9)]"></span>LIVE</span>';
+      if (state === 'offline') return '<span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-slate-400 ring-1 ring-white/10"><span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>OFF</span>';
+      return '<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-amber-300 ring-1 ring-amber-400/25"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400"></span>SYNC</span>';
+    };
+
+    /* =====================================================================
+       Juegos: logs de arranque/parada, eventos ambientales y estadísticas
+       ===================================================================== */
+    const GAMES = {
+      minecraft: {
+        label: 'Minecraft', version: 'Paper 1.21.1', icon: 'box',
+        tile: 'from-emerald-400 via-green-500 to-lime-500', glow: 'rgba(52,211,153,.55)',
+        egg: 'Paper', image: 'ghcr.io/pterodactyl/yolks:java_21',
+        disk: [['Mundos', .58], ['Copias', .26], ['Plugins', .11], ['Logs', .05]],
+        names: ['Kirax', 'LunaCraft', 'PixelPablo', 'Ender_Queen', 'Redstone_Rafa', 'MossyMiner', 'Nebula_77', 'DiamondDiego', 'Sofi_Builds', 'TorchBearer', 'VoidWalker', 'Aurora_mc', 'BlazeRunner', 'Quartzy', 'MapacheMC', 'xXSteveXx', 'GhastBuster', 'CreeperChan', 'NetherNico', 'Alex_Vega', 'Biomasa', 'OakLeaf', 'Frostbyte', 'Cobble_King'],
+        chat: ['¿alguien tiene hierro de sobra?', 'voy al nether, ¿quién se apunta?', 'gg', 'la granja de aldeanos ya está lista', 'lag?', 'buenas a todos!', '¿dónde está la tienda del spawn?', 'cuidado con los creepers jaja', '¿alguien me presta unas elytras?', 'ya terminé el castillo, venid a verlo', '¿hacemos el raid del End esta noche?', 'acabo de encontrar diamantes en la capa -58'],
+        boot: (s) => [
+          ['daemon', 'Server marked as starting...'],
+          ['daemon', 'Checking server disk space usage, this could take a few seconds...'],
+          ['daemon', 'Updated process configuration file.'],
+          ['daemon', 'Ensuring file permissions are set correctly, this could take a few seconds...'],
+          ['daemon', 'Pulling Docker container image, this could take a few minutes to complete...'],
+          ['daemon', 'Finished pulling Docker container image', 420],
+          ['raw', 'openjdk version "21.0.4" 2024-07-16 LTS'],
+          ['daemon', 'java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -jar server.jar nogui'],
+          ['info', 'Loading Paper 1.21.1-130-master@b48403b (2024-10-23T14:01:11Z) for Minecraft 1.21.1', 320],
+          ['info', '[bootstrap] Running Java 21 (OpenJDK 64-Bit Server VM 21.0.4+7-LTS; Eclipse Adoptium Temurin-21.0.4+7) on Linux 6.1.0-26-amd64 (amd64)'],
+          ['info', 'Found new data pack file/bukkit, loading it automatically'],
+          ['info', 'Loaded 1290 recipes'],
+          ['info', 'Loaded 1399 advancements', 260],
+          ['info', 'Starting minecraft server version 1.21.1'],
+          ['info', 'Loading properties'],
+          ['info', 'This server is running Paper version 1.21.1-130-master@b48403b'],
+          ['info', 'Using 4 threads for Netty based IO'],
+          ['info', '[ChunkTaskScheduler] Chunk system is using 1 I/O threads, 3 worker threads, and population gen parallelism of 3 threads'],
+          ['info', 'Default game type: SURVIVAL'],
+          ['info', 'Generating keypair'],
+          ['info', `Starting Minecraft server on 0.0.0.0:${s.port}`],
+          ['info', 'Using epoll channel type'],
+          ['info', 'Paper: Using libdeflate (Linux x86_64) compression from Velocity.'],
+          ['info', 'Paper: Using OpenSSL 3.x.x (Linux x86_64) cipher from Velocity.'],
+          ['info', '[LuckPerms] Loading server plugin LuckPerms v5.4.141'],
+          ['info', '[Essentials] Loading server plugin Essentials v2.21.0'],
+          ['info', '[WorldEdit] Loading server plugin WorldEdit v7.3.6'],
+          ['info', 'Preparing level "world"', 420],
+          ['info', 'Preparing start region for dimension minecraft:overworld'],
+          ['info', `Time elapsed: ${randi(1800, 2600)} ms`, 320],
+          ['info', 'Preparing start region for dimension minecraft:the_nether'],
+          ['info', `Time elapsed: ${randi(380, 640)} ms`],
+          ['info', 'Preparing start region for dimension minecraft:the_end'],
+          ['info', `Time elapsed: ${randi(300, 480)} ms`],
+          ['info', '[LuckPerms] Enabling LuckPerms v5.4.141'],
+          ['info', '[Essentials] Enabling Essentials v2.21.0'],
+          ['warn', '[WorldEdit] Using legacy block mappings; consider updating your schematics.'],
+          ['info', 'Running delayed init tasks'],
+          ['success', `Done (${rand(6, 9).toFixed(3)}s)! For help, type "help"`, 280],
+          ['info', 'Timings Reset'],
+          ['daemon', 'Server marked as running...'],
+        ],
+        stop: (s) => [
+          ['daemon', 'Server marked as stopping...'],
+          ['info', 'Stopping the server'],
+          ['info', 'Stopping server'],
+          ...s.players.slice(0, 4).map((p) => ['info', `${p.name} lost connection: Server closed`, 50]),
+          ['info', '[Essentials] Disabling Essentials v2.21.0'],
+          ['info', '[LuckPerms] Disabling LuckPerms v5.4.141'],
+          ['info', 'Saving players'],
+          ['info', 'Saving worlds', 320],
+          ['info', "Saving chunks for level 'ServerLevel[world]'/minecraft:overworld"],
+          ['info', "Saving chunks for level 'ServerLevel[world_nether]'/minecraft:the_nether"],
+          ['info', "Saving chunks for level 'ServerLevel[world_the_end]'/minecraft:the_end"],
+          ['info', 'ThreadedAnvilChunkStorage (world): All chunks are saved', 280],
+          ['info', 'ThreadedAnvilChunkStorage: All dimensions are saved'],
+          ['info', 'Flushing Chunk IO'],
+          ['info', 'Closing Thread Pool'],
+          ['info', 'Closing Server'],
+          ['daemon', 'Server marked as offline...'],
+        ],
+        joinLines: (s, p) => [
+          ['info', `${p.name}[/${playerIp()}:${randi(40000, 60000)}] logged in with entity id ${randi(100, 9999)} at ([world]${rand(-900, 900).toFixed(1)}, ${randi(62, 118)}.0, ${rand(-900, 900).toFixed(1)})`],
+          ['join', `${p.name} joined the game`],
+        ],
+        leaveLines: (s, p) => [['info', `${p.name} lost connection: Disconnected`], ['join', `${p.name} left the game`]],
+        ambient(s) {
+          const r = Math.random();
+          if (r < 0.2 || !s.players.length) return playerJoin(s);
+          if (r < 0.33 && s.players.length > 4) return playerLeave(s);
+          const p = pick(s.players).name;
+          if (r < 0.7) return pushLog(s, 'chat', pick(this.chat), { who: p });
+          if (r < 0.8) return pushLog(s, 'info', `${p} has made the advancement [${pick(['Diamonds!', 'We Need to Go Deeper', 'Monster Hunter', 'Hot Stuff', 'Ice Bucket Challenge', 'Return to Sender', 'Sweet Dreams'])}]`);
+          if (r < 0.89) return pushLog(s, 'info', `${p} ${pick(['was slain by Zombie', 'was blown up by Creeper', 'fell from a high place', 'tried to swim in lava', 'was shot by Skeleton', 'drowned'])}`);
+          if (r < 0.97) { pushLog(s, 'info', 'Saving the game (this may take a moment!)'); return setTimeout(() => s.state === 'running' && pushLog(s, 'info', 'Saved the game'), 900); }
+          pushLog(s, 'warn', `Can't keep up! Is the server overloaded? Running ${randi(2010, 3400)}ms or ${randi(40, 68)} ticks behind`);
+        },
+        stats: (s, on) => [
+          ['TPS', on ? s.m.tick.toFixed(2) : '—', on ? (s.m.tick > 18 ? 'text-emerald-300' : s.m.tick > 15 ? 'text-amber-300' : 'text-rose-300') : ''],
+          ['MSPT', on ? `${(s.m.cpu * 0.3 + 4).toFixed(1)} ms` : '—'],
+          ['Entidades', on ? fmtInt(620 + s.players.length * 41 + randi(-15, 15)) : '—'],
+          ['Chunks', on ? fmtInt(1450 + s.players.length * 175) : '—'],
+        ],
+      },
+
+      rust: {
+        label: 'Rust', version: 'Oxide 2.0', icon: 'flame',
+        tile: 'from-orange-400 via-red-500 to-rose-600', glow: 'rgba(249,115,22,.55)',
+        egg: 'Rust (Oxide)', image: 'ghcr.io/pterodactyl/games:rust',
+        disk: [['Mapa y saves', .44], ['Copias', .38], ['Oxide', .12], ['Logs', .06]],
+        names: ['Wipeday_Wally', 'RoofCamper', 'ScrapLord', 'NakedBob', 'OilRigRat', 'Zerg_Leader', 'BeanCanBandit', 'TC_Hunter', 'SulfurSam', 'Bradley_Fan', 'Outpost_Olga', 'HazmatHugo', 'DoorCamper', 'Rockman', 'Krieger', 'Lupo', 'Mira_AK', 'PipeShotty'],
+        chat: ['¿wipe a las 20:00?', 'vendo azufre por scrap', '¿alguien en outpost?', 'raid en E14!!', 'gg', 'busco grupo para oil rig', 'el bradley está bajo', 'no disparéis, friendly!', 'quién tiene C4?'],
+        boot: (s) => [
+          ['daemon', 'Server marked as starting...'],
+          ['daemon', 'Pulling Docker container image, this could take a few minutes to complete...'],
+          ['daemon', 'Finished pulling Docker container image', 320],
+          ['daemon', `./RustDedicated -batchmode +server.port ${s.port} +server.identity "rust" +server.level "Procedural Map" +server.seed 1337 +server.worldsize 3500 +server.maxplayers ${s.max} +rcon.web 1`],
+          ['raw', 'Loading Prefab Bundle Assets'],
+          ['info', `Loading prefab bundles... (${rand(12, 16).toFixed(1)}s)`, 520],
+          ['info', '[Oxide] Loading Oxide Core v2.0.6215...'],
+          ['info', '[Oxide] Loading extensions...'],
+          ['info', '[Oxide] Loaded extension CSharp v2.0.4061 by Oxide and Contributors'],
+          ['info', '[Oxide] Loaded extension Rust v2.0.6215 by Oxide and Contributors'],
+          ['info', 'Initializing 34 entity save files'],
+          ['info', 'Generating procedural map of size 3500 with seed 1337', 420],
+          ['info', 'Loading save file proceduralmap.3500.1337.256.sav'],
+          ['info', 'Spawning 2417 entities from map', 280],
+          ['info', 'Spawning 9812 entities from save', 320],
+          ['info', 'Initializing 17 stability supports'],
+          ['info', 'SteamServer Initialized'],
+          ['info', '[Oxide] Loaded plugin Kits v4.4.0 by k1lly0u'],
+          ['info', '[Oxide] Loaded plugin Clans v0.2.6 by k1lly0u'],
+          ['warn', '[Oxide] BetterChat v5.2.12: configuration file updated with new defaults'],
+          ['success', 'Server startup complete', 260],
+          ['daemon', 'Server marked as running...'],
+        ],
+        stop: () => [
+          ['daemon', 'Server marked as stopping...'],
+          ['info', 'Saving 9,812 entities'],
+          ['info', 'Saved 9,812 ents, cache(0.12), write(0.03), disk(0.04).', 320],
+          ['info', '[Oxide] Unloading plugins...'],
+          ['info', 'Disconnecting all players: Server shutting down'],
+          ['info', 'Shutting down Steam server'],
+          ['daemon', 'Server marked as offline...'],
+        ],
+        joinLines: (s, p) => [['join', `${playerIp()}:${randi(40000, 60000)}/${steamId()}/${p.name} joined [windows/${steamId()}]`]],
+        leaveLines: (s, p) => [['join', `${playerIp()}:${randi(40000, 60000)}/${steamId()}/${p.name} disconnecting: closing`]],
+        ambient(s) {
+          const r = Math.random();
+          if (r < 0.22 || !s.players.length) return playerJoin(s);
+          if (r < 0.38 && s.players.length > 6) return playerLeave(s);
+          const p = pick(s.players).name;
+          if (r < 0.66) return pushLog(s, 'chat', pick(this.chat), { who: p });
+          if (r < 0.86) return pushLog(s, 'info', `${p}[${steamId()}] was killed by ${pick(['scientist', 'a bear', 'a wolf', 'a landmine', 'the cold', pick(s.players).name])}`);
+          if (r < 0.96) return pushLog(s, 'info', `Saved ${fmtInt(9800 + randi(0, 300))} ents, cache(0.${randi(8, 14)}), write(0.0${randi(2, 4)}), disk(0.0${randi(3, 6)}).`);
+          pushLog(s, 'warn', `[Oxide] Calling 'OnPlayerChat' on 'BetterChat v5.2.12' took ${randi(180, 420)}ms`);
+        },
+        stats: (s, on) => [
+          ['FPS', on ? `${Math.round(s.m.tick * 12.8)}` : '—', on ? 'text-emerald-300' : ''],
+          ['Entidades', on ? fmtInt(98000 + s.players.length * 120 + randi(-200, 200)) : '—'],
+          ['Ping medio', on && s.players.length ? `${Math.round(s.players.reduce((a, p) => a + p.ping, 0) / s.players.length)} ms` : '—'],
+          ['Próximo wipe', '3 d 14 h'],
+        ],
+      },
+
+      valheim: {
+        label: 'Valheim', version: '0.219.14', icon: 'axe',
+        tile: 'from-sky-400 via-blue-500 to-indigo-600', glow: 'rgba(59,130,246,.55)',
+        egg: 'Valheim', image: 'ghcr.io/pterodactyl/games:source',
+        disk: [['Mundos', .35], ['Copias', .45], ['Mods', .14], ['Logs', .06]],
+        names: ['Ragnar', 'Freya', 'Bjorn_Ironside', 'Sigrid', 'Ulf', 'Astrid', 'Leif', 'Ingrid', 'Torvald', 'Hilda'],
+        chat: ['¿vamos a por el Anciano?', 'necesito bronce', 'el barco está listo en el muelle'],
+        boot: (s) => [
+          ['daemon', 'Server marked as starting...'],
+          ['daemon', 'Finished pulling Docker container image', 300],
+          ['daemon', `./valheim_server.x86_64 -nographics -batchmode -name "${s.name}" -port ${s.port} -world "Midgard" -public 1`],
+          ['info', 'Valheim version: l-0.219.14 (network version 34)', 320],
+          ['info', 'Steam game server initialized'],
+          ['info', 'Loading world: Midgard'],
+          ['info', 'ZoneSystem Start 3182', 320],
+          ['info', 'DungeonDB Start 3182'],
+          ['info', 'Loaded 154 locations', 280],
+          ['info', 'Game server connected'],
+          ['success', `Session "${s.name}" with join code ${randi(100000, 999999)} and IP ${s.ip}:${s.port} is active with 0 player(s)`],
+          ['daemon', 'Server marked as running...'],
+        ],
+        stop: () => [
+          ['daemon', 'Server marked as stopping...'],
+          ['info', 'World save writing started'],
+          ['info', `World saved ( ${rand(180, 420).toFixed(3)}ms )`, 300],
+          ['info', 'OnApplicationQuit'],
+          ['info', 'Net scene destroyed'],
+          ['daemon', 'Server marked as offline...'],
+        ],
+        joinLines: (s, p) => [['join', `Got character ZDOID from ${p.name} : -${randi(100000000, 999999999)}:1`]],
+        leaveLines: () => [['join', `Closing socket ${steamId()}`]],
+        ambient(s) {
+          const r = Math.random();
+          if (r < 0.3 || !s.players.length) return playerJoin(s);
+          if (r < 0.42 && s.players.length > 2) return playerLeave(s);
+          if (r < 0.62) return pushLog(s, 'chat', pick(this.chat), { who: pick(s.players).name });
+          if (r < 0.85) return pushLog(s, 'info', `World saved ( ${rand(180, 420).toFixed(3)}ms )`);
+          pushLog(s, 'warn', `Random event set:${pick(['army_eikthyr', 'foresttrolls', 'skeletons', 'wolves'])}`);
+        },
+        stats: (s, on) => [
+          ['FPS', on ? `${Math.round(40 + s.m.tick)}` : '—', on ? 'text-emerald-300' : ''],
+          ['Instancias', on ? fmtInt(18400 + s.players.length * 900) : '—'],
+          ['Zonas activas', on ? `${12 + s.players.length * 9}` : '—'],
+          ['Día', on ? 'Día 142' : '—'],
+        ],
+      },
+
+      cs2: {
+        label: 'Counter-Strike 2', version: '1.40', icon: 'crosshair',
+        tile: 'from-amber-300 via-yellow-500 to-orange-500', glow: 'rgba(234,179,8,.5)',
+        egg: 'Counter-Strike 2', image: 'ghcr.io/pterodactyl/games:source',
+        disk: [['Juego', .78], ['Demos', .12], ['Mapas', .07], ['Logs', .03]],
+        names: ['s1mple_fan', 'ZywOo_wannabe', 'Clutch_King', 'AWP_Andrea', 'flick_god', 'smokeCriminal', 'eco_round', 'ropz_jr', 'entry_frag', 'NoScopeNacho', 'DefuseDani', 'Rush_B'],
+        chat: ['nice shot', 'eco?', 'rotad B', 'ns', 'gg wp', 'save!'],
+        boot: (s) => [
+          ['daemon', 'Server marked as starting...'],
+          ['daemon', 'Finished pulling Docker container image', 300],
+          ['daemon', `./game/bin/linuxsteamrt64/cs2 -dedicated -port ${s.port} +map de_mirage -maxplayers ${s.max} +game_type 0 +game_mode 1`],
+          ['info', 'Steam AppId(730) set in environment'],
+          ['info', 'Loaded 412 VPK file hashes from pak01_dir.vpk', 280],
+          ['info', 'Initializing Steamworks GameServer...'],
+          ['info', `Network: IP 0.0.0.0, mode MP, dedicated Yes, ports ${s.port} SV / 27005 CL`],
+          ['info', 'Spawn Server: de_mirage', 420],
+          ['info', 'Connection to Steam servers successful.'],
+          ['info', 'VAC secure mode is activated.'],
+          ['success', 'GC Connection established for server version 14053'],
+          ['daemon', 'Server marked as running...'],
+        ],
+        stop: () => [
+          ['daemon', 'Server marked as stopping...'],
+          ['info', 'Dropped all clients: Server shutting down'],
+          ['info', 'Shutting down GameServer', 260],
+          ['info', 'CGameServer::Shutdown'],
+          ['daemon', 'Server marked as offline...'],
+        ],
+        joinLines: (s, p) => [['join', `"${p.name}<${randi(2, 40)}><[U:1:${randi(10000000, 99999999)}]><>" entered the game`]],
+        leaveLines: (s, p) => [['join', `"${p.name}<${randi(2, 40)}><[U:1:${randi(10000000, 99999999)}]><CT>" disconnected (reason "NETWORK_DISCONNECT_DISCONNECT_BY_USER")`]],
+        ambient(s) {
+          const r = Math.random();
+          if (s.players.length < 2 || (r < 0.12 && s.players.length < s.max)) return playerJoin(s);
+          if (r < 0.18 && s.players.length > 6) return playerLeave(s);
+          if (r < 0.3) return pushLog(s, 'chat', pick(this.chat), { who: pick(s.players).name });
+          if (r < 0.82) {
+            const [a, b] = [pick(s.players).name, pick(s.players).name];
+            return pushLog(s, 'info', `"${a}<CT>" killed "${b}<TERRORIST>" with "${pick(['ak47', 'm4a1_silencer', 'awp', 'deagle', 'usp_silencer', 'galilar'])}"${Math.random() < 0.35 ? ' (headshot)' : ''}`);
+          }
+          const ct = Math.random() < 0.52;
+          s.match[ct ? 'ct' : 't']++;
+          if (s.match.ct + s.match.t >= 24) s.match = { ct: 0, t: 0 };
+          pushLog(s, 'success', `Team "${ct ? 'CT' : 'TERRORIST'}" triggered "${ct ? 'SFUI_Notice_CTs_Win' : 'SFUI_Notice_Terrorists_Win'}" (CT "${s.match.ct}") (T "${s.match.t}")`);
+        },
+        stats: (s, on) => [
+          ['Tickrate', on ? '64' : '—', on ? 'text-emerald-300' : ''],
+          ['Mapa', on ? 'de_mirage' : '—'],
+          ['Ronda', on ? `${s.match.ct + s.match.t + 1}/24` : '—'],
+          ['Marcador', on ? `CT ${s.match.ct} – ${s.match.t} T` : '—'],
+        ],
+      },
+    };
+
+    /* =====================================================================
+       Nodo y servidores
+       ===================================================================== */
+    const NODE = { name: 'fra-01', host: 'fra-01.panel.local', ip: '203.0.113.42', location: 'Frankfurt, DE', cpu: 1600, ram: 64 };
+    const MAX_LINES = 400;
+
+    const servers = [
+      { id: '8f3a2c1e', name: 'Survival SMP',      slug: 'survival-smp',    game: 'minecraft', port: 25565, max: 50,  state: 'running', uptime: 2 * 3600 + 14 * 60 + 33, online: 18, limits: { cpu: 400, ram: 12, disk: 50 }, disk: 31.2, base: { cpu: 46, ram: 6.6 } },
+      { id: 'c41b9d07', name: 'Rust · Vanilla',    slug: 'rust-vanilla',    game: 'rust',      port: 28015, max: 150, state: 'running', uptime: 26 * 3600 + 5 * 60,       online: 87, limits: { cpu: 600, ram: 16, disk: 80 }, disk: 54.8, base: { cpu: 58, ram: 11.2 } },
+      { id: '5e2f7a90', name: 'Valheim · Midgard', slug: 'valheim-midgard', game: 'valheim',   port: 2456,  max: 10,  state: 'offline', uptime: 0,                       online: 0,  limits: { cpu: 200, ram: 8,  disk: 20 }, disk: 6.4,  base: { cpu: 30, ram: 3.4 } },
+      { id: 'a93d1c55', name: 'CS2 · Competitivo', slug: 'cs2-competitivo', game: 'cs2',       port: 27015, max: 10,  state: 'running', uptime: 5 * 3600 + 42 * 60,       online: 9,  limits: { cpu: 300, ram: 6,  disk: 40 }, disk: 33.9, base: { cpu: 41, ram: 2.9 } },
+    ].map(mkServer);
+
+    let activeId = store.get('glassy.server', servers[0].id);
+    if (!servers.some((s) => s.id === activeId)) activeId = servers[0].id;
+    const active = () => servers.find((s) => s.id === activeId);
+    const byId = (id) => servers.find((s) => s.id === id);
+
+    function mkServer(cfg) {
+      const s = { ...cfg, ip: NODE.ip, log: [], players: [], seq: null, nextAmbient: 0, cpuAlertAt: 0, match: { ct: 7, t: 6 } };
+      s.startedAt = s.state === 'running' ? Date.now() - cfg.uptime * 1000 : null;
+      for (let i = 0; i < cfg.online; i++) addPlayer(s, Date.now() - rand(60e3, Math.min(cfg.uptime * 1000, 3 * 3600e3)));
+      s.m = { cpu: 0, cores: Array(8).fill(0), ram: 0, ramHist: [], netIn: 0, netOut: 0, netHist: [], totalNet: rand(6, 24), tick: 0 };
+      for (let i = 0; i < 60; i++) stepMetrics(s);
+      seedLog(s);
+      return s;
+    }
+
+    function uniqueName(s) {
+      const pool = GAMES[s.game].names;
+      const taken = new Set(s.players.map((p) => p.name));
+      for (let i = 0; i < 30; i++) { const n = pick(pool); if (!taken.has(n)) return n; }
+      let n;
+      do { n = `${pick(pool)}${randi(2, 999)}`; } while (taken.has(n));
+      return n;
+    }
+    function addPlayer(s, joinedAt = Date.now()) {
+      const p = { name: uniqueName(s), ping: randi(14, 135), joinedAt };
+      s.players.push(p);
+      return p;
+    }
+
+    // Historial previo: líneas de arranque con marcas de tiempo pasadas + últimas conexiones
+    function seedLog(s) {
+      const g = GAMES[s.game];
+      if (s.state !== 'running') {
+        s.log.push({ t: new Date(Date.now() - 47 * 60e3), type: 'daemon', text: 'Server marked as offline...' });
+        return;
+      }
+      let t = s.startedAt - 9000;
+      g.boot(s).forEach(([type, text]) => { t += randi(60, 380); s.log.push({ t: new Date(Math.min(t, s.startedAt)), type, text }); });
+      [...s.players].sort((a, b) => a.joinedAt - b.joinedAt).slice(-6).forEach((p) =>
+        g.joinLines(s, p).forEach(([type, text]) => s.log.push({ t: new Date(p.joinedAt), type, text })));
+    }
+
+    /* =====================================================================
+       Simulación de métricas (paseo aleatorio con reversión a la media)
+       ===================================================================== */
+    function stepMetrics(s) {
+      const m = s.m;
+      const on = s.state !== 'offline';
+      let tCpu = 0, tRam = 0;
+      if (s.state === 'running') {
+        const load = s.players.length / s.max;
+        tCpu = s.base.cpu * (0.7 + load * 0.6);
+        tRam = s.base.ram * (0.9 + load * 0.2);
+      } else if (s.state === 'starting') { tCpu = 86; tRam = s.base.ram * 0.75; }
+      else if (s.state === 'stopping') { tCpu = 32; tRam = s.base.ram * 0.45; }
+
+      if (on) {
+        m.cpu = clamp(m.cpu + (tCpu - m.cpu) * 0.25 + rand(-5, 5), 1, 99);
+        if (s.state === 'running' && Math.random() < 0.03) m.cpu = clamp(m.cpu + rand(12, 26), 1, 99);
+        m.ram = clamp(m.ram + (tRam - m.ram) * 0.09 + rand(-0.05, 0.08), 0.2, s.limits.ram * 0.97);
+        if (s.state === 'running' && Math.random() < 0.03) m.ram = Math.max(0.5, m.ram - rand(0.3, 0.7)); // GC
+        m.netIn = clamp(m.netIn + (s.players.length * 0.35 + 4 - m.netIn) * 0.15 + rand(-3, 3), 0.3, 400);
+        m.netOut = clamp(m.netOut + (s.players.length * 0.16 + 2 - m.netOut) * 0.15 + rand(-1.5, 1.5), 0.2, 400);
+        s.disk = Math.min(s.limits.disk, s.disk + rand(0, 0.0006));
+      } else {
+        m.cpu = Math.max(0, m.cpu * 0.35 - 0.2);
+        m.ram = Math.max(0, m.ram * 0.5 - 0.05);
+        m.netIn = Math.max(0, m.netIn * 0.3 - 0.1);
+        m.netOut = Math.max(0, m.netOut * 0.3 - 0.1);
+      }
+      m.cores = m.cores.map((c) => (on ? clamp(m.cpu + rand(-24, 24), 2, 100) : c * 0.3));
+      m.tick = s.state === 'running' ? clamp(20 - Math.max(0, m.cpu - 72) * 0.07 - rand(0, 0.06), 12, 20) : 0;
+      m.totalNet += (m.netIn + m.netOut) / 8 / 1024;
+      m.ramHist.push(m.ram); if (m.ramHist.length > 60) m.ramHist.shift();
+      m.netHist.push([m.netIn, m.netOut]); if (m.netHist.length > 28) m.netHist.shift();
+    }
+
+    /* =====================================================================
+       Consola
+       ===================================================================== */
+    const out = $('#consoleOut');
+    let autoscroll = true;
+    let stickToBottom = true; // se desactiva si el usuario sube manualmente
+    const scrollToEnd = () => { out.scrollTop = out.scrollHeight; };
+
+    function lineHTML(s, e) {
+      const msg = esc(e.text);
+      switch (e.type) {
+        case 'daemon': return `<span class="font-semibold text-amber-300">container@pterodactyl~</span> <span class="text-slate-100">${msg}</span>`;
+        case 'cmd': return `<span class="text-fuchsia-400">❯</span> <span class="text-fuchsia-100">${msg}</span>`;
+        case 'system': return `<span class="text-violet-300">● ${msg}</span>`;
+        case 'raw': return `<span class="text-slate-400">${msg}</span>`;
+      }
+      const ts = hhmmss(e.t);
+      const lvl = e.type === 'warn' ? 'WARN' : e.type === 'error' ? 'ERROR' : 'INFO';
+      const lvlCls = { WARN: 'text-amber-400', ERROR: 'text-rose-400', INFO: 'text-sky-400' }[lvl];
+      const msgCls = { warn: 'text-amber-200', error: 'text-rose-300', success: 'text-emerald-300', join: 'text-yellow-200/90', chat: 'text-slate-100' }[e.type] || 'text-slate-300';
+      let body = msg;
+      if (e.type === 'chat') {
+        const who = `<span class="text-fuchsia-300">${esc(e.who)}</span>`;
+        body = s.game === 'minecraft' ? `&lt;${who}&gt; ${msg}` : `[CHAT] ${who}: ${msg}`;
+      }
+      const prefix = s.game === 'minecraft'
+        ? `<span class="text-slate-500">[${ts} <span class="${lvlCls}">${lvl}</span>]:</span>`
+        : `<span class="text-slate-500">[${ts}]</span>${lvl !== 'INFO' ? ` <span class="${lvlCls}">${lvl}</span>` : ''}`;
+      return `${prefix} <span class="${msgCls}">${body}</span>`;
+    }
+
+    function renderConsole() {
+      const s = active();
+      const header = `<div><span class="text-violet-300">● Conectado a la consola de ${esc(s.name)} · wings@${NODE.name} (websocket)</span></div>`;
+      out.innerHTML = header + s.log.map((e) => `<div>${lineHTML(s, e)}</div>`).join('');
+      stickToBottom = true;
+      scrollToEnd();
+    }
+
+    function pushLog(s, type, text, extra = {}) {
+      const e = { t: new Date(), type, text, ...extra };
+      s.log.push(e);
+      if (s.log.length > MAX_LINES) s.log.splice(0, s.log.length - MAX_LINES);
+      if (s.id !== activeId) return;
+      const div = document.createElement('div');
+      div.className = 'cl-new';
+      div.innerHTML = lineHTML(s, e);
+      out.appendChild(div);
+      while (out.childElementCount > MAX_LINES + 1) out.firstElementChild.remove();
+      if (autoscroll && stickToBottom) scrollToEnd();
+    }
+
+    // Reproduce una secuencia de líneas con retardos; se cancela si cambia s.seq
+    function runSequence(s, lines, done) {
+      const token = {};
+      s.seq = token;
+      let i = 0;
+      (function step() {
+        if (s.seq !== token) return;
+        if (i >= lines.length) { s.seq = null; done?.(); return; }
+        const [type, text, delay] = lines[i++];
+        pushLog(s, type, text);
+        setTimeout(step, delay ?? randi(70, 210));
+      })();
+    }
+
+    /* ---------- Jugadores ---------- */
+    function playerJoin(s) {
+      if (s.players.length >= s.max) return;
+      const p = addPlayer(s);
+      GAMES[s.game].joinLines(s, p).forEach(([type, text]) => pushLog(s, type, text));
+      onPlayersChanged(s);
+    }
+    function playerLeave(s, name, kicked = false) {
+      const i = name ? s.players.findIndex((p) => p.name.toLowerCase() === name.toLowerCase()) : randi(0, s.players.length - 1);
+      if (i < 0) return null;
+      const [p] = s.players.splice(i, 1);
+      if (kicked) {
+        pushLog(s, 'info', `Kicked ${p.name}: Kicked by an operator`);
+        if (s.game === 'minecraft') pushLog(s, 'join', `${p.name} left the game`);
+      } else {
+        GAMES[s.game].leaveLines(s, p).forEach(([type, text]) => pushLog(s, type, text));
+      }
+      onPlayersChanged(s);
+      return p;
+    }
+    function onPlayersChanged(s) {
+      if (s.id === activeId) { renderPlayers(); updateHeroLive(); }
+      renderSidebarServers();
+      updateServerCards();
+    }
+
+    /* ---------- Comandos ---------- */
+    const COMMANDS = ['help', 'list', 'say', 'tps', 'kick', 'op', 'time', 'weather', 'save-all', 'version', 'clear', 'restart', 'stop'];
+    const history = [];
+    let histIdx = -1;
+
+    function runCommand(raw) {
+      const s = active();
+      const cmd = raw.trim();
+      if (!cmd) return;
+      history.unshift(cmd); histIdx = -1;
+      if (s.state === 'offline' || s.state === 'stopping') { toast('El servidor no acepta comandos ahora mismo', 'amber', 'alert'); return; }
+      pushLog(s, 'cmd', cmd);
+      const [name, ...args] = cmd.replace(/^\//, '').split(/\s+/);
+      const arg = args.join(' ');
+      const g = GAMES[s.game];
+      const reply = (type, text, extra) => setTimeout(() => pushLog(s, type, text, extra), randi(60, 160));
+
+      switch (name.toLowerCase()) {
+        case 'help':
+          reply('info', 'Comandos disponibles en este panel:');
+          [['help', 'muestra esta ayuda'], ['list', 'jugadores conectados'], ['say <mensaje>', 'anuncio global'], ['tps', 'rendimiento del servidor'],
+           ['kick <jugador>', 'expulsa a un jugador'], ['op <jugador>', 'otorga permisos de operador'], ['time set <day|night>', 'cambia la hora'],
+           ['weather <clear|rain|thunder>', 'cambia el clima'], ['save-all', 'guarda el mundo'], ['version', 'versión del servidor'],
+           ['clear', 'limpia la consola'], ['restart · stop', 'control de energía']]
+            .forEach(([c, d]) => reply('info', `  ${c.padEnd(30)} ${d}`));
+          break;
+        case 'clear': case 'cls':
+          s.log = []; renderConsole(); break;
+        case 'list': case 'players': case 'status': {
+          const names = s.players.map((p) => p.name);
+          reply('info', s.game === 'minecraft'
+            ? `There are ${names.length} of a max of ${s.max} players online: ${names.join(', ')}`
+            : `${names.length}/${s.max} jugadores conectados: ${names.slice(0, 20).join(', ')}${names.length > 20 ? ` y ${names.length - 20} más` : ''}`);
+          break;
+        }
+        case 'say':
+          if (!arg) { reply('warn', 'Uso: say <mensaje>'); break; }
+          reply('chat', arg, { who: 'Server' });
+          break;
+        case 'tps':
+          if (s.game !== 'minecraft') { reply('warn', `«tps» no está disponible para ${g.label}. Revisa las estadísticas bajo la consola.`); break; }
+          reply('info', `TPS from last 1m, 5m, 15m: ${s.m.tick.toFixed(1)}, ${clamp(s.m.tick + 0.02, 0, 20).toFixed(1)}, ${clamp(s.m.tick - 0.03, 0, 20).toFixed(2)}`);
+          break;
+        case 'kick':
+          if (!arg) { reply('warn', 'Uso: kick <jugador>'); break; }
+          if (!playerLeave(s, args[0], true)) reply('warn', `No player was found: ${args[0]}`);
+          break;
+        case 'op':
+          if (!arg) { reply('warn', 'Uso: op <jugador>'); break; }
+          reply('info', s.players.some((p) => p.name.toLowerCase() === args[0].toLowerCase()) ? `Made ${args[0]} a server operator` : `That player does not exist: ${args[0]}`);
+          break;
+        case 'time':
+          if (s.game !== 'minecraft') { reply('warn', `Comando desconocido para ${g.label}: ${name}`); break; }
+          reply('info', `Set the time to ${args[1] === 'night' ? 13000 : 1000}`);
+          break;
+        case 'weather':
+          if (s.game !== 'minecraft') { reply('warn', `Comando desconocido para ${g.label}: ${name}`); break; }
+          reply('info', { rain: 'Set the weather to rain', thunder: 'Set the weather to rain & thunder' }[args[0]] || 'Set the weather to clear');
+          break;
+        case 'save-all': case 'save': case 'server.save':
+          reply('info', s.game === 'minecraft' ? 'Saving the game (this may take a moment!)' : 'Guardando el mundo…');
+          setTimeout(() => pushLog(s, 'success', s.game === 'minecraft' ? 'Saved the game' : 'Guardado completado'), 900);
+          break;
+        case 'version': case 'ver':
+          reply('info', `${g.label} ${g.version} · imagen ${g.image}`);
+          break;
+        case 'stop': case 'quit': case 'exit':
+          power(s, 'stop'); break;
+        case 'restart':
+          power(s, 'restart'); break;
+        default:
+          if (s.game === 'minecraft') {
+            reply('warn', 'Unknown or incomplete command, see below for error');
+            reply('warn', `${cmd}<--[HERE]`);
+          } else {
+            reply('warn', `Comando desconocido: ${name} (escribe «help»)`);
+          }
+      }
+    }
+
+    /* =====================================================================
+       Energía
+       ===================================================================== */
+    function setState(s, state) {
+      s.state = state;
+      if (s.id === activeId) { syncPowerUI(); renderPlayers(); }
+      renderSidebarServers();
+      updateCardStatus(s);
+      updateActiveCount();
+      applyFilter();
+    }
+
+    function power(s, action) {
+      const g = GAMES[s.game];
+      if (action === 'start' && s.state === 'offline') {
+        setState(s, 'starting');
+        toast(`Iniciando ${s.name}…`, 'emerald', 'play');
+        runSequence(s, g.boot(s), () => {
+          s.startedAt = Date.now();
+          s.nextAmbient = Date.now() + 2500;
+          setState(s, 'running');
+          notify({ icon: 'check', tone: 'emerald', title: `${s.name} está en línea`, body: `${g.label} escuchando en ${s.ip}:${s.port}` });
+        });
+      } else if (action === 'stop') {
+        if (s.state === 'stopping') return kill(s);
+        if (s.state !== 'running' && s.state !== 'starting') return;
+        const lines = g.stop(s);
+        s.players = [];
+        setState(s, 'stopping');
+        onPlayersChanged(s);
+        toast(`Deteniendo ${s.name}… pulsa «Forzar» para matar el proceso`, 'rose', 'power');
+        runSequence(s, lines, () => { s.startedAt = null; setState(s, 'offline'); });
+      } else if (action === 'restart' && s.state === 'running') {
+        const lines = g.stop(s);
+        s.players = [];
+        setState(s, 'stopping');
+        onPlayersChanged(s);
+        toast(`Reiniciando ${s.name}…`, 'amber', 'rotate');
+        runSequence(s, lines, () => {
+          s.startedAt = null;
+          setState(s, 'offline');
+          setTimeout(() => power(s, 'start'), 700);
+        });
+      }
+    }
+
+    function kill(s) {
+      s.seq = null;
+      s.players = [];
+      s.startedAt = null;
+      pushLog(s, 'warn', 'Proceso terminado con SIGKILL a petición del usuario');
+      pushLog(s, 'daemon', 'Server marked as offline...');
+      setState(s, 'offline');
+      onPlayersChanged(s);
+      toast(`${s.name} se ha apagado de forma forzada`, 'rose', 'zap');
+    }
+
+    /* =====================================================================
+       Render de la vista
+       ===================================================================== */
+    const el = {
+      hero: $('#hero'), heroTile: $('#heroTile'), heroName: $('#heroName'), heroStatus: $('#heroStatus'), heroMeta: $('#heroMeta'),
+      heroIp: $('#heroIp'), heroPlayers: $('#heroPlayers'), heroUptime: $('#heroUptime'), heroGlow: $('#heroGlow'),
+      btnStart: $('#btnStart'), btnRestart: $('#btnRestart'), btnStop: $('#btnStop'), btnStopLabel: $('#btnStopLabel'),
+      input: $('#consoleInput'), consolePath: $('#consolePath'), consoleStats: $('#consoleStats'),
+    };
+
+    function renderHero(animate = false) {
+      const s = active(), g = GAMES[s.game];
+      el.heroTile.className = `game-tile h-14 w-14 sm:h-16 sm:w-16 ${g.tile}`;
+      el.heroTile.style.setProperty('--glow', g.glow);
+      el.heroTile.innerHTML = svg(g.icon, 'h-7 w-7 sm:h-8 sm:w-8');
+      el.heroName.textContent = s.name;
+      el.heroMeta.innerHTML = `${g.label} · ${g.version} · <span class="font-mono text-slate-500">${s.id}</span>`;
+      el.heroIp.textContent = `${s.ip}:${s.port}`;
+      el.consolePath.textContent = `~/${s.slug}`;
+      if (animate && !reduceMotion) { el.hero.classList.remove('rise-in', 'swap-in'); void el.hero.offsetWidth; el.hero.classList.add('swap-in'); }
+      syncPowerUI();
+    }
+
+    function syncPowerUI() {
+      const s = active(), st = s.state;
+      el.btnStart.disabled = st !== 'offline';
+      el.btnRestart.disabled = st !== 'running';
+      el.btnStop.disabled = st === 'offline';
+      el.btnStopLabel.textContent = st === 'stopping' ? 'Forzar' : 'Apagar';
+      el.btnStop.title = st === 'stopping' ? 'Forzar apagado (kill)' : 'Apagar servidor';
+      el.heroStatus.innerHTML = statusPill(st);
+      el.heroGlow.style.background = `radial-gradient(closest-side, ${STATES[st].glow}, transparent)`;
+      $$('[data-live]').forEach((n) => { n.innerHTML = liveChip(st); });
+      el.input.disabled = st === 'offline' || st === 'stopping';
+      el.input.placeholder = el.input.disabled ? 'Servidor apagado — inícialo para enviar comandos' : 'Escribe un comando…  (prueba «help»)';
+      updateHeroLive();
+    }
+
+    function updateHeroLive() {
+      const s = active();
+      el.heroPlayers.textContent = `${s.players.length} / ${s.max}`;
+      el.heroUptime.textContent = s.state === 'running' && s.startedAt ? fmtDuration(Date.now() - s.startedAt) : '—';
+    }
+
+    function renderDetails() {
+      const s = active(), g = GAMES[s.game];
+      const rows = [
+        ['Nodo', `${NODE.name} · ${NODE.location}`],
+        ['Dirección', `${s.ip}:${s.port}`],
+        ['Egg', g.egg],
+        ['Imagen', g.image],
+        ['SFTP', `sftp://${NODE.host}:2022`],
+        ['Límites', `${s.limits.cpu}% · ${s.limits.ram} GB · ${s.limits.disk} GB`],
+      ];
+      $('#details').innerHTML = rows.map(([k, v]) => `
+        <div class="flex items-center justify-between gap-4 border-b border-white/[0.06] py-2.5 last:border-0">
+          <dt class="shrink-0 text-slate-400">${k}</dt>
+          <dd class="truncate text-right font-mono text-xs text-slate-200" title="${esc(v)}">${esc(v)}</dd>
+        </div>`).join('');
+    }
+
+    function renderPlayers() {
+      const s = active();
+      $('#playersBadge').textContent = `${s.players.length}/${s.max}`;
+      $('#playersBar').style.width = `${(s.players.length / s.max) * 100}%`;
+      const list = $('#playerList');
+      if (!s.players.length) {
+        const [icon, title, hint] = {
+          running: ['users', 'Nadie conectado todavía', 'Los jugadores aparecerán aquí en tiempo real.'],
+          starting: ['rotate', 'Iniciando servidor…', 'Los jugadores podrán unirse en cuanto esté listo.'],
+          stopping: ['power', 'Deteniendo servidor…', 'Guardando el mundo y desconectando a los jugadores.'],
+          offline: ['power', 'Servidor apagado', 'Inicia el servidor para ver a los jugadores.'],
+        }[s.state];
+        list.innerHTML = `<li class="flex flex-col items-center gap-2 px-4 py-8 text-center">
+          <span class="grid h-11 w-11 place-items-center rounded-2xl bg-white/[0.05] text-slate-500 ring-1 ring-white/10">${svg(icon, 'h-5 w-5')}</span>
+          <span class="text-sm text-slate-300">${title}</span>
+          <span class="text-xs text-slate-500">${hint}</span>
+        </li>`;
+        return;
+      }
+      list.innerHTML = [...s.players].reverse().slice(0, 60).map((p) => {
+        const hue = [...p.name].reduce((a, c) => a + c.charCodeAt(0) * 7, 0) % 360;
+        const tone = p.ping < 60 ? 'bg-emerald-400' : p.ping < 110 ? 'bg-amber-400' : 'bg-rose-400';
+        const bars = [1, 2, 3].map((b) => `<span class="w-[3px] rounded-sm ${b <= (p.ping < 60 ? 3 : p.ping < 110 ? 2 : 1) ? tone : 'bg-white/15'}" style="height:${b * 4 + 2}px"></span>`).join('');
+        return `<li class="group flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.06]">
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[11px] font-bold text-white ring-1 ring-white/20" style="background:linear-gradient(135deg,hsl(${hue} 75% 58%),hsl(${(hue + 50) % 360} 70% 42%))">${esc(p.name.slice(0, 2).toUpperCase())}</span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-[13px] text-slate-200">${esc(p.name)}</span>
+            <span class="block text-[11px] text-slate-500">conectado ${playtime(p.joinedAt)}</span>
+          </span>
+          <span class="flex items-end gap-0.5" title="${p.ping} ms">${bars}</span>
+          <span class="w-11 text-right font-mono text-[11px] text-slate-400">${p.ping} ms</span>
+          <button class="icon-btn-sm h-7 w-7 opacity-100 hover:bg-rose-500/20 hover:text-rose-200 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100" data-kick="${esc(p.name)}" aria-label="Expulsar a ${esc(p.name)}" title="Expulsar">${svg('user-x', 'h-3.5 w-3.5')}</button>
+        </li>`;
+      }).join('');
+    }
+
+    // Spline Catmull-Rom → Bézier para un trazo suave
+    function sparkPath(values, max, w = 300, h = 80, padY = 6) {
+      const step = w / (values.length - 1);
+      const pts = values.map((v, i) => [i * step, h - padY - clamp(v / max, 0, 1) * (h - padY * 2)]);
+      let d = `M${pts[0][0]},${pts[0][1].toFixed(1)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+      }
+      return { line: d, area: `${d} L${w},${h} L0,${h} Z`, last: pts[pts.length - 1] };
+    }
+
+    const DISK_COLORS = ['bg-emerald-400', 'bg-cyan-300', 'bg-violet-400', 'bg-slate-400'];
+
+    function renderMetrics() {
+      const s = active(), m = s.m, g = GAMES[s.game];
+      const on = s.state === 'running';
+
+      // CPU
+      $('#cpuVal').textContent = m.cpu.toFixed(1);
+      $('#cpuBar').style.width = `${m.cpu}%`;
+      const meter = $('#cpuMeter');
+      meter.dataset.level = m.cpu > 90 ? 'crit' : m.cpu > 75 ? 'warn' : 'ok';
+      meter.setAttribute('aria-valuenow', m.cpu.toFixed(0));
+      $('#cpuLimit').textContent = `${s.limits.cpu}%`;
+      $('#cpuSub').textContent = `${s.limits.cpu / 100} vCores`;
+      $('#cpuLoad').textContent = ((m.cpu / 100) * (s.limits.cpu / 100) * 1.08).toFixed(2);
+      $$('#cpuCores .core-fill').forEach((c, i) => {
+        c.style.height = `${Math.max(3, m.cores[i])}%`;
+        c.className = `core-fill absolute inset-x-0 bottom-0 rounded-md bg-linear-to-t ${m.cores[i] > 85 ? 'from-rose-500/70 to-orange-300' : 'from-cyan-500/50 to-violet-400'}`;
+      });
+
+      // RAM
+      const ramPct = (m.ram / s.limits.ram) * 100;
+      $('#ramVal').textContent = m.ram.toFixed(2);
+      $('#ramMax').textContent = s.limits.ram;
+      $('#ramPct').textContent = `${ramPct.toFixed(0)}%`;
+      const sp = sparkPath(m.ramHist, s.limits.ram);
+      $('#ramLine').setAttribute('d', sp.line);
+      $('#ramArea').setAttribute('d', sp.area);
+      $('#ramDot').style.top = `${(sp.last[1] / 80) * 100}%`;
+      $('#ramPeak').textContent = `${Math.max(...m.ramHist).toFixed(1)} GB`;
+      $('#ramAvg').textContent = `${(m.ramHist.reduce((a, b) => a + b, 0) / m.ramHist.length).toFixed(1)} GB`;
+
+      // Almacenamiento
+      const diskPct = (s.disk / s.limits.disk) * 100;
+      $('#diskVal').textContent = s.disk.toFixed(1);
+      $('#diskMax').textContent = s.limits.disk;
+      $('#diskFree').textContent = `${(s.limits.disk - s.disk).toFixed(1)} GB`;
+      $('#diskPct').textContent = `${diskPct.toFixed(0)}%`;
+      $('#diskRing').setAttribute('stroke-dashoffset', (263.9 * (1 - diskPct / 100)).toFixed(1));
+      $('#diskSeg').innerHTML = g.disk.map(([, f], i) => `<div class="${DISK_COLORS[i]} h-full transition-[width] duration-700" style="width:${(diskPct * f).toFixed(2)}%"></div>`).join('');
+      $('#diskLegend').innerHTML = g.disk.map(([label, f], i) => `<li class="flex items-center gap-1.5 truncate"><span class="h-2 w-2 shrink-0 rounded-full ${DISK_COLORS[i]}"></span><span class="truncate">${label}</span><span class="ml-auto font-mono text-slate-300">${(s.disk * f).toFixed(1)}</span></li>`).join('');
+
+      // Red
+      $('#netIn').textContent = m.netIn.toFixed(1);
+      $('#netOut').textContent = m.netOut.toFixed(1);
+      $('#netTotal').textContent = `${m.totalNet.toFixed(1)} GB`;
+      const maxNet = Math.max(20, ...m.netHist.map(([a, b]) => Math.max(a, b)));
+      $('#netBars').innerHTML = m.netHist.map(([a, b]) => `<div class="relative h-full flex-1">
+          <div class="absolute inset-x-0 bottom-0 rounded-t-sm bg-linear-to-t from-sky-500/30 to-sky-300/80" style="height:${Math.max(2, (a / maxNet) * 100)}%"></div>
+          <div class="absolute inset-x-[28%] bottom-0 rounded-t-sm bg-violet-300/90 shadow-[0_0_6px_rgba(196,181,253,.7)]" style="height:${Math.max(1, (b / maxNet) * 100)}%"></div>
+        </div>`).join('');
+
+      // Estadísticas bajo la consola
+      el.consoleStats.innerHTML = g.stats(s, on).map(([k, v, cls]) => `
+        <div class="flex items-center justify-between gap-2 px-4 py-2 sm:block">
+          <dt class="text-slate-500">${k}</dt>
+          <dd class="font-mono text-[12px] ${cls || 'text-slate-200'}">${v}</dd>
+        </div>`).join('');
+    }
+
+    function renderSidebarServers() {
+      $('#navServers').innerHTML = servers.map((s) => `
+        <li><button type="button" class="sub-item w-full ${s.id === activeId ? 'is-active' : ''}" data-select="${s.id}">
+          ${statusDot(s.state, 'h-1.5 w-1.5')}
+          <span class="truncate">${esc(s.name)}</span>
+          <span class="ml-auto font-mono text-[10px] text-slate-500">${s.players.length}/${s.max}</span>
+        </button></li>`).join('') +
+        `<li><button type="button" class="sub-item w-full text-violet-300 hover:text-violet-200" data-soon="Crear servidor">${svg('plus', 'h-3.5 w-3.5')}<span>Crear servidor</span></button></li>`;
+      $('#navServerCount').textContent = servers.length;
+    }
+
+    /* ---------- Tarjetas de servidores del nodo ---------- */
+    const cardRefs = {};
+    function renderServerGrid() {
+      $('#serverGrid').innerHTML = servers.map((s, i) => {
+        const g = GAMES[s.game];
+        return `<article class="server-card glass glass-hover spotlight rise-in group rounded-3xl p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60"
+            data-card="${s.id}" data-select="${s.id}" tabindex="0" role="button" aria-label="Gestionar ${esc(s.name)}" style="--d:${480 + i * 70}ms; --spot:${g.glow.replace(/[\d.]+\)$/, '.16)')}">
+          <div class="flex items-start justify-between gap-3">
+            <span class="game-tile h-11 w-11 ${g.tile}" style="--glow:${g.glow}">${svg(g.icon, 'h-5 w-5')}</span>
+            <span data-ref="status"></span>
+          </div>
+          <h3 class="mt-4 truncate font-semibold text-white">${esc(s.name)}</h3>
+          <p class="truncate text-xs text-slate-400">${g.label} · ${g.version}</p>
+          <div class="mt-4 space-y-3 text-[11px]">
+            <div>
+              <div class="mb-1 flex justify-between text-slate-400"><span>CPU</span><span data-ref="cpuVal" class="font-mono text-slate-200"></span></div>
+              <div class="mini-meter"><div data-ref="cpuBar" class="bg-linear-to-r from-cyan-400 to-violet-500" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div class="mb-1 flex justify-between text-slate-400"><span>RAM</span><span data-ref="ramVal" class="font-mono text-slate-200"></span></div>
+              <div class="mini-meter"><div data-ref="ramBar" class="bg-linear-to-r from-violet-400 to-fuchsia-500" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between gap-2 border-t border-white/10 pt-3 text-xs text-slate-400">
+            <span class="truncate font-mono">${s.ip}:${s.port}</span>
+            <span class="inline-flex shrink-0 items-center gap-1">${svg('users', 'h-3.5 w-3.5')}<span data-ref="players" class="font-mono"></span></span>
+          </div>
+          <div class="mt-3 flex items-center gap-1.5 text-xs font-medium text-violet-300 opacity-70 transition group-hover:opacity-100">
+            <span data-ref="cta">Gestionar</span>${svg('chevron-right', 'h-3.5 w-3.5 transition-transform group-hover:translate-x-1')}
+          </div>
+        </article>`;
+      }).join('');
+
+      servers.forEach((s) => {
+        const card = $(`[data-card="${s.id}"]`);
+        cardRefs[s.id] = { card, ...Object.fromEntries($$('[data-ref]', card).map((n) => [n.dataset.ref, n])) };
+        updateCardStatus(s);
+      });
+      updateServerCards();
+      applyFilter();
+    }
+
+    function updateCardStatus(s) {
+      const r = cardRefs[s.id];
+      if (!r) return;
+      r.status.innerHTML = statusPill(s.state, true);
+      r.card.classList.toggle('is-selected', s.id === activeId);
+      r.card.setAttribute('aria-pressed', String(s.id === activeId));
+      r.cta.textContent = s.id === activeId ? 'Viendo ahora' : 'Gestionar';
+    }
+
+    function updateServerCards() {
+      servers.forEach((s) => {
+        const r = cardRefs[s.id];
+        if (!r) return;
+        r.cpuBar.style.width = `${s.m.cpu}%`;
+        r.cpuVal.textContent = `${s.m.cpu.toFixed(0)}%`;
+        r.ramBar.style.width = `${(s.m.ram / s.limits.ram) * 100}%`;
+        r.ramVal.textContent = `${s.m.ram.toFixed(1)} / ${s.limits.ram} GB`;
+        r.players.textContent = `${s.players.length}/${s.max}`;
+      });
+    }
+
+    function updateActiveCount() {
+      $('#activeCount').textContent = `${servers.filter((s) => s.state === 'running').length} de ${servers.length}`;
+    }
+
+    let filter = 'all';
+    function applyFilter() {
+      servers.forEach((s) => {
+        const r = cardRefs[s.id];
+        if (!r) return;
+        const show = filter === 'all' || (filter === 'on' ? s.state !== 'offline' : s.state === 'offline');
+        r.card.classList.toggle('hidden', !show);
+      });
+    }
+
+    function updateNodeWidget() {
+      const cpu = (servers.reduce((a, s) => a + (s.m.cpu / 100) * s.limits.cpu, 0) / NODE.cpu) * 100;
+      const ram = servers.reduce((a, s) => a + s.m.ram, 0);
+      $('#nodeCpuVal').textContent = `${cpu.toFixed(0)}%`;
+      $('#nodeCpuBar').style.width = `${cpu}%`;
+      $('#nodeRamVal').textContent = `${ram.toFixed(1)} / ${NODE.ram} GB`;
+      $('#nodeRamBar').style.width = `${(ram / NODE.ram) * 100}%`;
+    }
+
+    function selectServer(id, { scroll = false } = {}) {
+      if (!byId(id)) return;
+      const changed = id !== activeId;
+      activeId = id;
+      store.set('glassy.server', id);
+      if (changed) { renderHero(true); renderDetails(); renderPlayers(); renderConsole(); renderMetrics(); }
+      renderSidebarServers();
+      servers.forEach(updateCardStatus);
+      openMobileSidebar(false);
+      if (scroll) window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+
+    /* =====================================================================
+       Notificaciones y toasts
+       ===================================================================== */
+    const notifs = [
+      { id: uid(), icon: 'archive', tone: 'emerald', title: 'Copia de seguridad completada', body: 'Survival SMP · 2.4 GB en 48 s', time: Date.now() - 12 * 60e3, unread: true },
+      { id: uid(), icon: 'alert', tone: 'amber', title: 'CPU elevada en Rust · Vanilla', body: 'Pico del 92 % durante 3 minutos', time: Date.now() - 38 * 60e3, unread: true },
+      { id: uid(), icon: 'download', tone: 'violet', title: 'Wings v1.11.14 disponible', body: 'Actualiza el daemon del nodo fra-01', time: Date.now() - 3 * 3600e3, unread: true },
+      { id: uid(), icon: 'shield', tone: 'sky', title: 'Nuevo inicio de sesión', body: 'Madrid, ES · Firefox en Linux', time: Date.now() - 26 * 3600e3, unread: false },
+    ];
+
+    function renderNotifs() {
+      const unread = notifs.filter((n) => n.unread).length;
+      const badge = $('#notifBadge');
+      badge.textContent = unread > 9 ? '9+' : unread;
+      badge.classList.toggle('hidden', !unread);
+      $('#notifSummary').textContent = unread ? `${unread} sin leer` : 'Todo al día';
+      $('#notifList').innerHTML = notifs.map((n) => `
+        <li><button type="button" class="flex w-full gap-3 rounded-xl p-2.5 text-left transition hover:bg-white/[0.06]" data-notif="${n.id}">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl ring-1 ${TONES[n.tone]}">${svg(n.icon, 'h-4 w-4')}</span>
+          <span class="min-w-0 flex-1">
+            <span class="flex items-center gap-2"><span class="truncate text-[13px] font-medium ${n.unread ? 'text-white' : 'text-slate-300'}">${esc(n.title)}</span>${n.unread ? '<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-fuchsia-400 shadow-[0_0_8px_rgba(232,121,249,.9)]"></span>' : ''}</span>
+            <span class="mt-0.5 block truncate text-xs text-slate-400">${esc(n.body)}</span>
+            <span class="mt-1 block text-[11px] text-slate-500">${ago(n.time)}</span>
+          </span>
+        </button></li>`).join('');
+    }
+
+    function notify(n) {
+      notifs.unshift({ id: uid(), time: Date.now(), unread: true, ...n });
+      if (notifs.length > 15) notifs.pop();
+      renderNotifs();
+      const bell = $('#notifBtn svg');
+      bell?.classList.remove('wiggle'); void bell?.getBoundingClientRect(); bell?.classList.add('wiggle');
+    }
+
+    function toast(message, tone = 'violet', icon = 'info') {
+      const t = document.createElement('div');
+      t.className = 'toast glass-pop pointer-events-auto flex items-center gap-3 p-3 pr-4';
+      t.setAttribute('role', 'status');
+      t.innerHTML = `<span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg ring-1 ${TONES[tone]}">${svg(icon, 'h-4 w-4')}</span><p class="text-[13px] text-slate-100">${esc(message)}</p>`;
+      $('#toasts').appendChild(t);
+      requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('is-shown')));
+      setTimeout(() => { t.classList.remove('is-shown'); setTimeout(() => t.remove(), 450); }, 3400);
+      while ($('#toasts').childElementCount > 4) $('#toasts').firstElementChild.remove();
+    }
+
+    /* =====================================================================
+       Sidebar, menús y búsqueda
+       ===================================================================== */
+    const sidebar = $('#sidebar');
+    const sidebarBackdrop = $('#sidebarBackdrop');
+
+    function setCollapsed(v) {
+      sidebar.classList.toggle('is-collapsed', v);
+      const btn = $('#collapseBtn');
+      btn.setAttribute('aria-expanded', String(!v));
+      btn.setAttribute('aria-label', v ? 'Expandir barra lateral' : 'Contraer barra lateral');
+      store.set('glassy.collapsed', v);
+    }
+    function openMobileSidebar(v) {
+      if (isDesktop()) v = false;
+      sidebar.dataset.open = String(v);
+      sidebarBackdrop.classList.toggle('is-open', v);
+      document.body.classList.toggle('overflow-hidden', v);
+    }
+
+    const USER_STATUS = {
+      online: { label: 'En línea', dot: 'bg-emerald-400', text: 'text-emerald-300' },
+      away: { label: 'Ausente', dot: 'bg-amber-400', text: 'text-amber-300' },
+      dnd: { label: 'No molestar', dot: 'bg-rose-400', text: 'text-rose-300' },
+      invisible: { label: 'Invisible', dot: 'bg-slate-400', text: 'text-slate-400' },
+    };
+    let userStatus = store.get('glassy.status', 'online');
+    if (!USER_STATUS[userStatus]) userStatus = 'online';
+
+    function renderUserStatus() {
+      const st = USER_STATUS[userStatus];
+      const dot = $('#userDot');
+      dot.className = `absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full border-2 border-[#1b1342] ${st.dot}`;
+      dot.innerHTML = userStatus === 'online' ? `<span class="absolute inset-0 animate-ping rounded-full ${st.dot} opacity-50"></span>` : '';
+      const label = $('#userStatusLabel');
+      label.className = `block truncate text-xs ${st.text}`;
+      label.textContent = `${st.label} · Administrador`;
+      $('#userStatusList').innerHTML = Object.entries(USER_STATUS).map(([k, v]) => `
+        <button type="button" role="menuitemradio" aria-checked="${k === userStatus}" class="sub-item w-full" data-status="${k}">
+          <span class="h-2.5 w-2.5 rounded-full ${v.dot}"></span>${v.label}
+          ${k === userStatus ? svg('check', 'ml-auto h-4 w-4 text-violet-300') : ''}
+        </button>`).join('');
+    }
+
+    const POPS = { user: ['#userBtn', '#userMenu'], notif: ['#notifBtn', '#notifPanel'] };
+    function togglePop(key, force) {
+      const [btnSel, panelSel] = POPS[key];
+      const panel = $(panelSel);
+      const open = force ?? !panel.classList.contains('is-open');
+      Object.keys(POPS).forEach((k) => { if (k !== key && open) togglePop(k, false); });
+      panel.classList.toggle('is-open', open);
+      $(btnSel).setAttribute('aria-expanded', String(open));
+    }
+
+    const PAGES = [
+      { label: 'Bases de datos MySQL', hint: 'Base de datos', icon: 'database' },
+      { label: 'Copias de seguridad', hint: 'Base de datos', icon: 'archive' },
+      { label: 'Asignaciones de puertos', hint: 'Red', icon: 'network' },
+      { label: 'Subdominios', hint: 'Red', icon: 'link' },
+      { label: 'Claves API', hint: 'Configuración', icon: 'key' },
+      { label: 'Seguridad y 2FA', hint: 'Configuración', icon: 'shield' },
+    ];
+    const searchInput = $('#search');
+    const searchResults = $('#searchResults');
+    let results = [];
+    let resultIdx = 0;
+
+    function renderSearch() {
+      const q = searchInput.value.trim().toLowerCase();
+      const srv = servers.filter((s) => `${s.name} ${GAMES[s.game].label} ${s.port}`.toLowerCase().includes(q));
+      const pages = PAGES.filter((p) => `${p.label} ${p.hint}`.toLowerCase().includes(q));
+      results = [...srv.map((s) => ({ kind: 'server', s })), ...pages.map((p) => ({ kind: 'page', p }))];
+      resultIdx = clamp(resultIdx, 0, Math.max(0, results.length - 1));
+      if (!results.length) {
+        searchResults.innerHTML = `<p class="px-3 py-6 text-center text-sm text-slate-400">Sin resultados para «${esc(searchInput.value)}»</p>`;
+        return;
+      }
+      let html = '', lastKind = '';
+      results.forEach((r, i) => {
+        if (r.kind !== lastKind) { html += `<p class="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">${r.kind === 'server' ? 'Servidores' : 'Secciones'}</p>`; lastKind = r.kind; }
+        const sel = i === resultIdx ? 'bg-white/10 text-white' : 'text-slate-300';
+        html += r.kind === 'server'
+          ? `<button type="button" role="option" aria-selected="${i === resultIdx}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/10 ${sel}" data-result="${i}">
+              <span class="game-tile h-7 w-7 rounded-lg ${GAMES[r.s.game].tile}">${svg(GAMES[r.s.game].icon, 'h-3.5 w-3.5')}</span>
+              <span class="min-w-0 flex-1 truncate">${esc(r.s.name)}</span>${statusDot(r.s.state, 'h-1.5 w-1.5')}
+            </button>`
+          : `<button type="button" role="option" aria-selected="${i === resultIdx}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/10 ${sel}" data-result="${i}">
+              <span class="grid h-7 w-7 place-items-center rounded-lg bg-white/[0.06] text-slate-300 ring-1 ring-white/10">${svg(r.p.icon, 'h-3.5 w-3.5')}</span>
+              <span class="min-w-0 flex-1 truncate">${esc(r.p.label)}</span><span class="text-[11px] text-slate-500">${r.p.hint}</span>
+            </button>`;
+      });
+      searchResults.innerHTML = html;
+    }
+    function openSearch(v) {
+      searchResults.classList.toggle('is-open', v);
+      searchInput.setAttribute('aria-expanded', String(v));
+      if (v) renderSearch();
+    }
+    function chooseResult(i) {
+      const r = results[i];
+      if (!r) return;
+      if (r.kind === 'server') { selectServer(r.s.id, { scroll: true }); toast(`Viendo ${r.s.name}`, 'violet', 'server'); }
+      else toast(`La vista «${r.p.label}» llegará en la siguiente iteración del wireframe`, 'sky', r.p.icon);
+      searchInput.value = '';
+      openSearch(false);
+      searchInput.blur();
+    }
+
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); return true; }
+      catch {
+        const ta = Object.assign(document.createElement('textarea'), { value: text });
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch { /* sin soporte */ }
+        ta.remove(); return ok;
+      }
+    }
+
+    function toggleExpandConsole(force) {
+      const card = $('#consoleCard');
+      const v = force ?? !card.classList.contains('is-expanded');
+      card.classList.toggle('is-expanded', v);
+      $('#consoleBackdrop').classList.toggle('is-open', v);
+      document.body.classList.toggle('overflow-hidden', v);
+      const btn = $('#btnExpand');
+      btn.innerHTML = svg(v ? 'minimize' : 'maximize', 'h-4 w-4');
+      btn.setAttribute('aria-label', v ? 'Reducir consola' : 'Ampliar consola');
+      stickToBottom = true;
+      scrollToEnd();
+      if (v) el.input.focus();
+    }
+
+    /* =====================================================================
+       Eventos
+       ===================================================================== */
+    function bindEvents() {
+      // Delegación global de clics
+      document.addEventListener('click', (e) => {
+        const t = e.target;
+        // Cerrar popovers al hacer clic fuera de ellos
+        if (!t.closest('#userMenu, #userBtn')) togglePop('user', false);
+        if (!t.closest('#notifPanel, #notifBtn')) togglePop('notif', false);
+        if (!t.closest('#searchWrap')) openSearch(false);
+
+        const sel = t.closest('[data-select]');
+        if (sel) { selectServer(sel.dataset.select, { scroll: !!sel.closest('#serverGrid') }); return; }
+        const soon = t.closest('[data-soon]');
+        if (soon) { e.preventDefault(); togglePop('user', false); toast(`«${soon.dataset.soon}» está fuera del alcance de este wireframe`, 'sky', 'info'); return; }
+        const kick = t.closest('[data-kick]');
+        if (kick) { const s = active(); pushLog(s, 'cmd', `kick ${kick.dataset.kick}`); playerLeave(s, kick.dataset.kick, true); toast(`${kick.dataset.kick} ha sido expulsado`, 'rose', 'user-x'); return; }
+        const status = t.closest('[data-status]');
+        if (status) { userStatus = status.dataset.status; store.set('glassy.status', userStatus); renderUserStatus(); togglePop('user', false); return; }
+        const notif = t.closest('[data-notif]');
+        if (notif) { const n = notifs.find((x) => x.id === notif.dataset.notif); if (n) { n.unread = false; renderNotifs(); } return; }
+        const res = t.closest('[data-result]');
+        if (res) chooseResult(Number(res.dataset.result));
+      });
+
+      // Tarjetas con teclado
+      $('#serverGrid').addEventListener('keydown', (e) => {
+        const card = e.target.closest('[data-card]');
+        if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); selectServer(card.dataset.card, { scroll: true }); }
+      });
+
+      // Foco de luz que sigue al cursor
+      document.addEventListener('pointermove', (e) => {
+        const card = e.target.closest?.('.spotlight');
+        if (!card) return;
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      }, { passive: true });
+
+      // Energía
+      $$('[data-power]').forEach((b) => b.addEventListener('click', () => power(active(), b.dataset.power)));
+
+      // Copiar IP
+      $('#copyIp').addEventListener('click', async () => {
+        const s = active();
+        const ok = await copyText(`${s.ip}:${s.port}`);
+        toast(ok ? `Dirección ${s.ip}:${s.port} copiada` : 'No se pudo copiar la dirección', ok ? 'emerald' : 'rose', ok ? 'check' : 'alert');
+      });
+
+      // Sidebar
+      $('#collapseBtn').addEventListener('click', () => setCollapsed(!sidebar.classList.contains('is-collapsed')));
+      $('#openSidebar').addEventListener('click', () => openMobileSidebar(true));
+      $('#closeSidebar').addEventListener('click', () => openMobileSidebar(false));
+      sidebarBackdrop.addEventListener('click', () => openMobileSidebar(false));
+      matchMedia('(min-width: 64rem)').addEventListener('change', () => openMobileSidebar(false));
+      $$('[data-group-toggle]').forEach((btn) => btn.addEventListener('click', () => {
+        const group = btn.closest('.nav-group');
+        if (isDesktop() && sidebar.classList.contains('is-collapsed')) {
+          setCollapsed(false);
+          group.dataset.open = 'true';
+        } else {
+          group.dataset.open = String(group.dataset.open !== 'true');
+        }
+        btn.setAttribute('aria-expanded', group.dataset.open);
+      }));
+
+      // Popovers
+      $('#userBtn').addEventListener('click', (e) => { e.stopPropagation(); togglePop('user'); });
+      $('#notifBtn').addEventListener('click', (e) => { e.stopPropagation(); togglePop('notif'); });
+      $('#markAllRead').addEventListener('click', (e) => { e.stopPropagation(); notifs.forEach((n) => { n.unread = false; }); renderNotifs(); });
+
+      // Búsqueda
+      searchInput.addEventListener('focus', () => openSearch(true));
+      searchInput.addEventListener('input', () => { resultIdx = 0; openSearch(true); });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); resultIdx = Math.min(results.length - 1, resultIdx + 1); renderSearch(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); resultIdx = Math.max(0, resultIdx - 1); renderSearch(); }
+        else if (e.key === 'Enter') { e.preventDefault(); chooseResult(resultIdx); }
+        else if (e.key === 'Escape') { openSearch(false); searchInput.blur(); }
+      });
+
+      // Consola
+      $('#consoleForm').addEventListener('submit', (e) => { e.preventDefault(); runCommand(el.input.value); el.input.value = ''; });
+      el.input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' && history.length) { e.preventDefault(); histIdx = Math.min(history.length - 1, histIdx + 1); el.input.value = history[histIdx]; }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); histIdx = Math.max(-1, histIdx - 1); el.input.value = histIdx < 0 ? '' : history[histIdx]; }
+        else if (e.key === 'Tab') {
+          // Autocompletado de comandos y nombres de jugador
+          const parts = el.input.value.split(' ');
+          const last = parts[parts.length - 1].toLowerCase();
+          if (!last) return;
+          const pool = parts.length === 1 ? COMMANDS : active().players.map((p) => p.name);
+          const match = pool.find((c) => c.toLowerCase().startsWith(last));
+          if (match) { e.preventDefault(); parts[parts.length - 1] = match; el.input.value = `${parts.join(' ')}${parts.length === 1 ? ' ' : ''}`; }
+        }
+      });
+      $$('[data-cmd]').forEach((b) => b.addEventListener('click', () => { runCommand(b.dataset.cmd); el.input.focus(); }));
+      $('#btnClear').addEventListener('click', () => { active().log = []; renderConsole(); });
+      $('#btnAutoscroll').addEventListener('click', (e) => {
+        autoscroll = !autoscroll;
+        e.currentTarget.setAttribute('aria-pressed', String(autoscroll));
+        if (autoscroll) { stickToBottom = true; scrollToEnd(); }
+      });
+      out.addEventListener('scroll', () => { stickToBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 60; }, { passive: true });
+      // Mantiene el final visible cuando cambia el tamaño (carga de estilos, modo ampliado, responsive)
+      new ResizeObserver(() => { if (autoscroll && stickToBottom) scrollToEnd(); }).observe(out);
+      $('#btnExpand').addEventListener('click', () => toggleExpandConsole());
+      $('#consoleBackdrop').addEventListener('click', () => toggleExpandConsole(false));
+
+      // Filtros
+      $$('[data-filter]').forEach((b) => b.addEventListener('click', () => {
+        filter = b.dataset.filter;
+        $$('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        applyFilter();
+      }));
+
+      // Atajos de teclado
+      document.addEventListener('keydown', (e) => {
+        const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName);
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); searchInput.focus(); searchInput.select(); }
+        else if (e.key === '/' && !typing) { e.preventDefault(); searchInput.focus(); }
+        else if (e.key === 'Escape') {
+          togglePop('user', false); togglePop('notif', false); openMobileSidebar(false);
+          if ($('#consoleCard').classList.contains('is-expanded')) toggleExpandConsole(false);
+        }
+      });
+    }
+
+    /* =====================================================================
+       Bucle de simulación
+       ===================================================================== */
+    let ticks = 0;
+    function tick() {
+      const now = Date.now();
+      servers.forEach((s) => {
+        stepMetrics(s);
+        if (s.state === 'running' && now >= s.nextAmbient) {
+          GAMES[s.game].ambient(s);
+          s.nextAmbient = now + rand(2200, 6500);
+        }
+        if (s.state === 'running' && s.m.cpu > 94 && now - s.cpuAlertAt > 5 * 60e3) {
+          s.cpuAlertAt = now;
+          notify({ icon: 'alert', tone: 'amber', title: `CPU elevada en ${s.name}`, body: `${s.m.cpu.toFixed(0)} % del límite asignado (${s.limits.cpu} %)` });
+        }
+      });
+      renderMetrics();
+      updateServerCards();
+      updateNodeWidget();
+      updateHeroLive();
+      if (++ticks % 3 === 0) $('#nodeLatency').textContent = `${randi(9, 16)} ms`;
+      if (ticks % 30 === 0) { renderPlayers(); renderNotifs(); }
+    }
+
+    /* =====================================================================
+       Inicio
+       ===================================================================== */
+    function init() {
+      hydrateIcons();
+      $('#searchKbd').textContent = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘ K' : 'Ctrl K';
+      $('#cpuCores').innerHTML = Array.from({ length: 8 }, () =>
+        '<div class="relative h-full flex-1 overflow-hidden rounded-md bg-white/[0.05] ring-1 ring-white/5"><div class="core-fill absolute inset-x-0 bottom-0 rounded-md" style="height:0%"></div></div>').join('');
+      if (store.get('glassy.collapsed', false)) setCollapsed(true);
+      servers.forEach((s) => { s.nextAmbient = Date.now() + rand(1500, 5000); });
+
+      renderUserStatus();
+      renderNotifs();
+      renderSidebarServers();
+      renderServerGrid();
+      updateActiveCount();
+      renderHero();
+      renderDetails();
+      renderPlayers();
+      renderConsole();
+      renderMetrics();
+      updateNodeWidget();
+      bindEvents();
+      setInterval(tick, 1000);
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>
